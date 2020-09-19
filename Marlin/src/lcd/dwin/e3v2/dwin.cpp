@@ -42,10 +42,6 @@
   #define JUST_BABYSTEP 1
 #endif
 
-#include <WString.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "../../fontutils.h"
 #include "../../marlinui.h"
 
@@ -85,6 +81,10 @@
   #include "../../../feature/powerloss.h"
 #endif
 
+#include <WString.h>
+#include <stdio.h>
+#include <string.h>
+
 #ifndef MACHINE_SIZE
   #define MACHINE_SIZE STRINGIFY(X_BED_SIZE) "x" STRINGIFY(Y_BED_SIZE) "x" STRINGIFY(Z_MAX_POS)
 #endif
@@ -96,10 +96,6 @@
 
 #define USE_STRING_HEADINGS
 //#define USE_STRING_TITLES
-
-#define DWIN_FONT_MENU font8x16
-#define DWIN_FONT_STAT font10x20
-#define DWIN_FONT_HEAD font10x20
 
 #define MENU_CHAR_LIMIT  24
 #define STATUS_Y        360
@@ -134,6 +130,9 @@ constexpr uint16_t TROWS = 6, MROWS = TROWS - 1,        // Total rows, and other
 #define MBASE(L) (49 + MLINE * (L))
 
 #define BABY_Z_VAR TERN(HAS_BED_PROBE, probe.offset.z, dwin_zoffset)
+
+#define DWIN_BOTTOM (DWIN_HEIGHT-1)
+#define DWIN_RIGHT (DWIN_WIDTH-1)
 
 /* Value Init */
 HMI_value_t HMI_ValueStruct;
@@ -391,8 +390,8 @@ void ICON_Stop() {
   }
 }
 
-void Clear_Title_Bar() {
-  DWIN_Draw_Rectangle(1, Color_Bg_Blue, 0, 0, DWIN_WIDTH, 30);
+inline void Clear_Title_Bar() {
+  DWIN_Draw_Box(1, Color_Bg_Blue, 0, 0, DWIN_WIDTH, 30);
 }
 
 void Draw_Title(const char * const title) {
@@ -403,8 +402,8 @@ void Draw_Title(const __FlashStringHelper * title) {
   DWIN_Draw_String(false, false, DWIN_FONT_HEAD, Color_White, Color_Bg_Blue, 14, 4, (char*)title);
 }
 
-void Clear_Menu_Area() {
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, 0, 31, DWIN_WIDTH, STATUS_Y - 1);
+inline void Clear_Menu_Area() {
+  DWIN_Draw_Box(1, Color_Bg_Black, 0, 31, DWIN_WIDTH, STATUS_Y - 30);
 }
 
 void Clear_Main_Window() {
@@ -577,7 +576,9 @@ void draw_move_en(const uint16_t line) {
   #endif
 }
 
-void DWIN_Frame_TitleCopy(uint8_t id, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) { DWIN_Frame_AreaCopy(id, x1, y1, x2, y2, 14, 8); }
+inline void DWIN_Frame_TitleCopy(uint8_t id, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+  DWIN_Frame_AreaCopy(id, x1, y1, x2, y2, 14, 8);
+}
 
 void Item_Prepare_Move(const uint8_t row) {
   if (HMI_IsChinese())
@@ -849,7 +850,7 @@ void Draw_Tune_Menu() {
   Clear_Main_Window();
 
   if (HMI_IsChinese()) {
-    DWIN_Frame_AreaCopy(1, 73, 2, 100, 13, 14, 9);
+    DWIN_Frame_TitleCopy(1, 73, 2, 100, 13);
     DWIN_Frame_AreaCopy(1, 116, 164, 171, 176, LBLX, MBASE(TUNE_CASE_SPEED));
     #if HAS_HOTEND
       DWIN_Frame_AreaCopy(1, 1, 134, 56, 146, LBLX, MBASE(TUNE_CASE_TEMP));
@@ -883,6 +884,7 @@ void Draw_Tune_Menu() {
       #endif
       DWIN_Draw_Label(MBASE(TUNE_CASE_ZOFF), GET_TEXT_F(MSG_ZPROBE_ZOFFSET));
     #else
+      DWIN_Frame_TitleCopy(1, 94, 2, 126, 12);
       DWIN_Frame_AreaCopy(1, 1, 179, 92, 190, LBLX, MBASE(TUNE_CASE_SPEED));      // Print speed
       #if HAS_HOTEND
         DWIN_Frame_AreaCopy(1, 197, 104, 238, 114, LBLX, MBASE(TUNE_CASE_TEMP));  // Hotend...
@@ -1008,6 +1010,7 @@ void Draw_Motion_Menu() {
 //
 // Draw Popup Windows
 //
+
 #if HAS_HOTEND || HAS_HEATED_BED
 
   void DWIN_Popup_Temperature(const bool toohigh) {
@@ -1052,7 +1055,7 @@ void Draw_Popup_Bkgd_60() {
     DWIN_ICON_Show(ICON, ICON_TempTooLow, 102, 105);
     if (HMI_IsChinese()) {
       DWIN_Frame_AreaCopy(1, 103, 371, 136, 386, 69, 240);
-      DWIN_Frame_AreaCopy(1, 170, 371, 270, 386, 102, 240);
+      DWIN_Frame_AreaCopy(1, 170, 371, 270, 386, 69 + 33, 240);
       DWIN_ICON_Show(ICON, ICON_Confirm_C, 86, 280);
     }
     else {
@@ -1204,14 +1207,13 @@ void Goto_MainMenu() {
 
   Clear_Main_Window();
 
-  if (HMI_IsChinese()) {
-    DWIN_Frame_AreaCopy(1, 2, 2, 27, 14, 14, 9); // "Home"
-  }
+  if (HMI_IsChinese())
+    DWIN_Frame_TitleCopy(1, 2, 2, 27, 14); // "Home"
   else {
     #ifdef USE_STRING_HEADINGS
       Draw_Title(GET_TEXT_F(MSG_MAIN));
     #else
-      DWIN_Frame_AreaCopy(1, 0, 2, 39, 12, 14, 9);
+      DWIN_Frame_TitleCopy(1, 0, 2, 39, 12);
     #endif
   }
 
@@ -4031,7 +4033,7 @@ void EachMomentUpdate() {
       Goto_PrintProcess();
       Draw_Status_Area(true);
     }
-  #endif
+  #endif // POWER_LOSS_RECOVERY
 
   DWIN_UpdateLCD();
 }
