@@ -81,7 +81,7 @@
 
 #elif IS_DWIN_MARLINUI
 
-  #include "dwin/marlin/ultralcd_dwin.h"
+  #include "dwin/marlin/marlinui_dwin.h"
 
   #define LCD_PIXEL_WIDTH   DWIN_WIDTH
   #define LCD_PIXEL_HEIGHT  DWIN_HEIGHT
@@ -109,12 +109,14 @@
   #define LCD_COL_X(col) (col)
   #define LCD_ROW_Y(row) (row)
 
+  #define SETCURSOR(col, row)    lcd_moveto(LCD_COL_X(col), LCD_ROW_Y(row))
+  #define SETCURSOR_RJ(len, row) lcd_moveto(LCD_COL_X_RJ(len), LCD_ROW_Y(row))
+
 #endif
 
 #define LCD_COL_X_RJ(len)      (LCD_PIXEL_WIDTH - LCD_COL_X(len))
 #define LCD_BOTTOM_ROW         (LCD_PIXEL_HEIGHT - 1)
-#define SETCURSOR(col, row)    lcd_moveto(LCD_COL_X(col), LCD_ROW_Y(row))
-#define SETCURSOR_RJ(len, row) lcd_moveto(LCD_COL_X_RJ(len), LCD_ROW_Y(row))
+
 #define SETCURSOR_X(col)       SETCURSOR(col, _lcdLineNr)
 #define SETCURSOR_X_RJ(len)    SETCURSOR_RJ(len, _lcdLineNr)
 

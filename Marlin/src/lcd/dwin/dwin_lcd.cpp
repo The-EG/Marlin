@@ -128,7 +128,12 @@ void DWIN_Startup(void) {
   const bool success = DWIN_Handshake();
   if (success) DEBUG_ECHOLNPGM("ok."); else DEBUG_ECHOLNPGM("error.");
   DWIN_Frame_SetDir(DISABLED(DWIN_MARLINUI_LANDSCAPE) ? 1 : 0);
-  TERN(SHOW_BOOTSCREEN,,DWIN_Frame_Clear(Color_Bg_Black));
+  #if IS_DWIN_MARLINUI
+    // we take care of the boot screen in MarlinUI, so just clear the screen for now
+    DWIN_Frame_Clear(Color_Bg_Black);
+  #else
+    TERN(SHOW_BOOTSCREEN,,DWIN_Frame_Clear(Color_Bg_Black));
+  #endif
   DWIN_UpdateLCD();
 }
 
@@ -174,9 +179,10 @@ void DWIN_Frame_Clear(const uint16_t color) {
 //  width: point width   0x01-0x0F
 //  height: point height 0x01-0x0F
 //  x,y: upper left point
-void DWIN_Draw_Point(uint8_t width, uint8_t height, uint16_t x, uint16_t y) {
+void DWIN_Draw_Point(uint16_t color, uint8_t width, uint8_t height, uint16_t x, uint16_t y) {
   size_t i = 0;
   DWIN_Byte(i, 0x02);
+  DWIN_Word(i, color);
   DWIN_Byte(i, width);
   DWIN_Byte(i, height);
   DWIN_Word(i, x);
@@ -366,6 +372,7 @@ void DWIN_ICON_Show(uint8_t libID, uint8_t picID, uint16_t x, uint16_t y) {
   DWIN_Word(i, x);
   DWIN_Word(i, y);
   DWIN_Byte(i, 0x80 | libID);
+  //DWIN_Byte(i, libID);
   DWIN_Byte(i, picID);
   DWIN_Send(i);
 }
@@ -431,7 +438,7 @@ void DWIN_ICON_Animation(uint8_t animID, bool animate, uint8_t libID, uint8_t pi
 //  state: 16 bits, each bit is the state of an animation id
 void DWIN_ICON_AnimationControl(uint16_t state) {
   size_t i = 0;
-  DWIN_Byte(i, 0x28);
+  DWIN_Byte(i, 0x29);
   DWIN_Word(i, state);
   DWIN_Send(i);
 }

@@ -98,3 +98,26 @@ extern dwin_font_t dwin_font;
   #define INFO_FONT_DESCENT  4
 #endif
 #define INFO_FONT_HEIGHT (INFO_FONT_ASCENT + INFO_FONT_DESCENT)
+
+#if DWIN_FONT_STAT == font6x12
+  #define STAT_FONT_WIDTH    6
+  #define STAT_FONT_ASCENT  10
+  #define STAT_FONT_DESCENT  2
+#elif DWIN_FONT_STAT == font8x16
+  #define STAT_FONT_WIDTH    8
+  #define STAT_FONT_ASCENT  13
+  #define STAT_FONT_DESCENT  3
+#elif DWIN_FONT_STAT == font10x20
+  #define STAT_FONT_WIDTH   10
+  #define STAT_FONT_ASCENT  16
+  #define STAT_FONT_DESCENT  4
+#elif DWIN_FONT_STAT == font12x24
+  #define STAT_FONT_WIDTH   12
+  #define STAT_FONT_ASCENT  19
+  #define STAT_FONT_DESCENT  5
+#elif DWIN_FONT_STAT == font14x28
+  #define STAT_FONT_WIDTH   14
+  #define STAT_FONT_ASCENT  22
+  #define STAT_FONT_DESCENT  6
+#endif
+#define STAT_FONT_HEIGHT (STAT_FONT_ASCENT + STAT_FONT_DESCENT)
