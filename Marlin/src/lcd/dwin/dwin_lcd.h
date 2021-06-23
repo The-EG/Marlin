@@ -76,6 +76,7 @@
   #define ICON_Fan3                  8
   #define ICON_WarningError          9
 #else
+  #define ICON_LOGO                  0
   #define ICON_Print_0               1
   #define ICON_Print_1               2
   #define ICON_Prepare_0             3
@@ -171,6 +172,17 @@
   #define ICON_Confirm_E            89
   #define ICON_Info_0               90
   #define ICON_Info_1               91
+
+  #define ICON_AdvSet               ICON_Language
+  #define ICON_HomeOff              ICON_AdvSet
+  #define ICON_HomeOffX             ICON_StepX
+  #define ICON_HomeOffY             ICON_StepY
+  #define ICON_HomeOffZ             ICON_StepZ
+  #define ICON_ProbeOff             ICON_AdvSet
+  #define ICON_ProbeOffX            ICON_StepX
+  #define ICON_ProbeOffY            ICON_StepY
+  #define ICON_PIDNozzle            ICON_SetEndTemp
+  #define ICON_PIDbed               ICON_SetBedTemp
 #endif
 
 /**
