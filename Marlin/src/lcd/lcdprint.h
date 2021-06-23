@@ -88,8 +88,7 @@
   #define LCD_WIDTH  ((LCD_PIXEL_WIDTH)  / (MENU_FONT_WIDTH))
   #define LCD_HEIGHT ((LCD_PIXEL_HEIGHT) / (MENU_FONT_HEIGHT))
 
-  #define SETCURSOR(col, row)    lcd_moveto(col, row)
-  #define SETCURSOR_RJ(len, row) SETCURSOR(LCD_WIDTH - (len), row)
+
 
 #else
 
@@ -116,7 +115,8 @@
 
 #define LCD_COL_X_RJ(len)      (LCD_PIXEL_WIDTH - LCD_COL_X(len))
 #define LCD_BOTTOM_ROW         (LCD_PIXEL_HEIGHT - 1)
-
+#define SETCURSOR(col, row)    lcd_moveto(col, row)
+#define SETCURSOR_RJ(len, row) SETCURSOR(LCD_WIDTH - (len), row)
 #define SETCURSOR_X(col)       SETCURSOR(col, _lcdLineNr)
 #define SETCURSOR_X_RJ(len)    SETCURSOR_RJ(len, _lcdLineNr)
 
