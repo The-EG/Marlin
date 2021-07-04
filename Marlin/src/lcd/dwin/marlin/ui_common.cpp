@@ -332,10 +332,16 @@ void MarlinUI::draw_status_message(const bool blink) {
         dwin_string.add(": ");
         uint8_t n = LCD_WIDTH - plen - 2 - vallen;
         while(--n) dwin_string.add(' ');
-        dwin_string.add(data);
+        //dwin_string.add(data);
       }
       lcd_moveto(0, row);
       lcd_put_dwin_string();
+      if (vallen) {
+        set_dwin_text_fg(Color_Yellow);
+        dwin_string.set(data);
+        lcd_moveto(LCD_WIDTH - vallen, row);
+        lcd_put_dwin_string();
+      }
     }
   }
 
