@@ -31,7 +31,6 @@ uint8_t DWIN_String::data[];
 uint16_t DWIN_String::span;
 uint8_t DWIN_String::len;
 
-
 void DWIN_String::set() {
   //*data = 0x00;
   memset(data, 0x00, sizeof(data));

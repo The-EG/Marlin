@@ -188,4 +188,4 @@ lcd_uint_t lcd_put_u8str_ind_P(PGM_P const pstr, const int8_t ind, PGM_P const i
 
 #endif // DEBUG_LCDPRINT
 
-#endif // DWIN_MARLINUI_LANDSCAPE || DWIN_MARLINUI_PORTRAIT
+#endif // IS_DWIN_MARLINUI

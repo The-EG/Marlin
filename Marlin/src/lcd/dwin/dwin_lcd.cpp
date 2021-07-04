@@ -30,7 +30,7 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if ANY(DWIN_CREALITY_LCD, DWIN_MARLINUI_PORTRAIT, DWIN_MARLINUI_LANDSCAPE)
+#if ANY(DWIN_CREALITY_LCD, IS_DWIN_MARLINUI)
 
 #include "../../inc/MarlinConfig.h"
 
@@ -476,4 +476,4 @@ void DWIN_ICON_AnimationControl(uint16_t state) {
 //
 //  Flash writing returns 0xA5 0x4F 0x4B
 
-#endif // DWIN_CREALITY_LCD || DWIN_MARLINUI_PORTRAIT || DWIN_MARLINUI_LANDSCAPE
+#endif // DWIN_CREALITY_LCD || IS_DWIN_MARLINUI

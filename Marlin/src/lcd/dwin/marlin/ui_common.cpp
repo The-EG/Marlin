@@ -96,6 +96,7 @@ void MarlinUI::clear_lcd() {
 }
 
 #if ENABLED(SHOW_BOOTSCREEN)
+
   void MarlinUI::show_bootscreen() {
     clear_lcd();
     #ifdef DWIN_MARLINUI_PORTRAIT
@@ -135,7 +136,6 @@ void MarlinUI::draw_kill_screen() {
     DWIN_ICON_Show(ICON, ICON_WarningError, (LCD_PIXEL_WIDTH / 2) - 48, 40);
   #endif
 
-
   uint8_t slen = utf8_strlen(status_message);
   lcd_moveto(cx - (slen / 2), cy - 1);
   lcd_put_u8str(status_message);
@@ -148,7 +148,6 @@ void MarlinUI::draw_kill_screen() {
   lcd_moveto(cx - (slen / 2), cy + 1);
   lcd_put_u8str_P((const char*)GET_TEXT_F(MSG_HALTED));
 }
-
 
 void MarlinUI::draw_status_message(const bool blink) {
 
@@ -222,7 +221,6 @@ void MarlinUI::draw_status_message(const bool blink) {
     }
   #endif
 }
-
 
 #if HAS_LCD_MENU
 
@@ -553,4 +551,4 @@ void MarlinUI::draw_status_message(const bool blink) {
 
 #endif // HAS_LCD_MENU
 
-#endif
+#endif // IS_DWIN_MARLINUI

@@ -27,9 +27,8 @@
 #include "marlinui_dwin.h"
 #include "../dwin_lcd.h"
 #include "../dwin_string.h"
-
-//#include "../../lcdprint.h"
 #include "lcdprint_dwin.h"
+
 #include "../../fontutils.h"
 #include "../../../libs/numtostr.h"
 #include "../../marlinui.h"
@@ -42,7 +41,6 @@
 #if ENABLED(SDSUPPORT)
   #include "../../../libs/duration_t.h"
 #endif
-
 
 #define S(V) (char*)(V)
 
@@ -59,18 +57,15 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
   DWIN_Draw_String(false, true, font16x32, Color_IconBlue, Color_Bg_Black, x + (vallen * 14 / 2 ) - 7, y + 2, S(dwin_string.string()));
 
   dwin_string.set();
-  if(blink) dwin_string.add(value);
+  if (blink)
+    dwin_string.add(value);
   else {
     if (!TEST(axis_homed, axis))
       while (const char c = *value++) dwin_string.add(c <= '.' ? c : '?');
     else {
       #if NONE(HOME_AFTER_DEACTIVATE, DISABLE_REDUCED_ACCURACY_WARNING)
         if (!TEST(axis_trusted, axis))
-          #ifdef DWIN_MARLINUI_PORTRAIT
-          dwin_string.add(axis == Z_AXIS ? PSTR("       ") : PSTR("    "));
-          #else
-          dwin_string.add(PSTR("       "));
-          #endif
+          dwin_string.add(TERN1(DWIN_MARLINUI_PORTRAIT, axis == Z_AXIS) ? PSTR("       ") : PSTR("    "));
         else
       #endif
           dwin_string.add(value);
@@ -95,6 +90,9 @@ FORCE_INLINE void _draw_fan_status(uint16_t x, uint16_t y) {
   }
 }
 
+/**
+ * Draw a single heater icon with current and target temperature, at the given XY
+ */
 FORCE_INLINE void _draw_heater_status(const heater_id_t heater, uint16_t x, uint16_t y) {
   #if HAS_HEATED_BED
     const bool isBed = heater < 0;
@@ -107,7 +105,6 @@ FORCE_INLINE void _draw_heater_status(const heater_id_t heater, uint16_t x, uint
     const uint8_t isActive = thermalManager.isHeatingHotend(heater);
   #endif
 
-
   dwin_string.set();
   dwin_string.add(i16tostr3rj(t2 + 0.5));
   dwin_string.add(LCD_STR_DEGREE);
@@ -115,13 +112,15 @@ FORCE_INLINE void _draw_heater_status(const heater_id_t heater, uint16_t x, uint
 
   DWIN_ICON_Show(ICON, (isBed ? ICON_BedOff : ICON_HotendOff) + isActive, x, y + 30);
 
-
   dwin_string.set();
   dwin_string.add(i16tostr3rj(t1 + 0.5));
   dwin_string.add(LCD_STR_DEGREE);
   DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x, y + 70, (char*)dwin_string.string());
 }
 
+/**
+ * Draw the current "feed rate" percentage preceded by the >> character
+ */
 FORCE_INLINE void _draw_feedrate_status(const char *value, uint16_t x, uint16_t y) {
   //DWIN_ICON_Show(ICON, ICON_Setspeed, x, y + 4);
 
@@ -135,10 +134,13 @@ FORCE_INLINE void _draw_feedrate_status(const char *value, uint16_t x, uint16_t 
   DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x + 14, y, (char*)dwin_string.string());
 }
 
+/**
+ * Draw the MarlinUI Status Screen for Ender 3 V2
+ */
 void MarlinUI::draw_status_screen() {
   const bool blink = get_blink();
   // Logo/Status Icon
-  DWIN_ICON_Show(ICON,ICON_LOGO, (LCD_PIXEL_WIDTH / 2) - (130 / 2),15);
+  DWIN_ICON_Show(ICON,ICON_LOGO, (LCD_PIXEL_WIDTH / 2) - (130 / 2), 15);
 
   _draw_heater_status(H_E0, 15, 60);
 
@@ -155,111 +157,108 @@ void MarlinUI::draw_status_screen() {
   #endif
 
   // Draw a frame around the x/y/z values
-  #ifdef DWIN_MARLINUI_PORTRAIT
-  DWIN_Draw_Rectangle(0, Select_Color, 0, 163, 272, 230);
-  #else
-  DWIN_Draw_Rectangle(0, Select_Color, LCD_PIXEL_WIDTH-106, 50, LCD_PIXEL_WIDTH-1, 230);
-  #endif
+  DWIN_Draw_Rectangle(0, Select_Color,
+    #if ENABLED(DWIN_MARLINUI_PORTRAIT)
+      0, 163, 272, 230
+    #else
+      LCD_PIXEL_WIDTH - 106, 50, LCD_PIXEL_WIDTH - 1, 230
+    #endif
+  );
 
   // Axis values
   // TODO: E instead of X/Y
-  const xy_pos_t lpos = current_position.asLogical();
-  #ifdef DWIN_MARLINUI_PORTRAIT
-  _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 5, 165);
-  _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, 165);
-  _draw_axis_value(Z_AXIS, ftostr52sp(LOGICAL_Z_POSITION(current_position.z)), blink, 165, 165);
+  const xyz_pos_t lpos = current_position.asLogical();
+  #if ENABLED(DWIN_MARLINUI_PORTRAIT)
+    constexpr int16_t cpy = 165;
+    _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 5, cpy);
+    _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, cpy);
+    _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, 165, cpy);
   #else
-  _draw_axis_value(X_AXIS, ftostr52sp(lpos.x), blink, LCD_PIXEL_WIDTH - 104, 52);
-  _draw_axis_value(Y_AXIS, ftostr52sp(lpos.y), blink, LCD_PIXEL_WIDTH - 104, 111);
-  _draw_axis_value(Z_AXIS, ftostr52sp(LOGICAL_Z_POSITION(current_position.z)), blink, LCD_PIXEL_WIDTH - 104, 169);
+    constexpr int16_t cpx = LCD_PIXEL_WIDTH - 104;
+    _draw_axis_value(X_AXIS, ftostr52sp(lpos.x), blink, cpx,  52);
+    _draw_axis_value(Y_AXIS, ftostr52sp(lpos.y), blink, cpx, 111);
+    _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, cpx, 169);
   #endif
 
   // Feedrate
-  #ifdef DWIN_MARLINUI_PORTRAIT
-  _draw_feedrate_status(i16tostr3rj(feedrate_percentage), 5, 250);
-  #else
-  _draw_feedrate_status(i16tostr3rj(feedrate_percentage), 292, 60);
-  #endif
+  _draw_feedrate_status(i16tostr3rj(feedrate_percentage),
+    #if ENABLED(DWIN_MARLINUI_PORTRAIT)
+      5, 250
+    #else
+      292, 60
+    #endif
+  );
 
   // Elapsed time
-  // Portrait mode only shows one value at a time, and will rotate if ROTATE_PROGRESS_DISPLAY
-  #ifdef DWIN_MARLINUI_PORTRAIT
-  dwin_string.set();
   char buffer[14];
   duration_t time;
-  char prefix = ' ';
-  #ifdef SHOW_REMAINING_TIME
-    #ifdef ROTATE_PROGRESS_DISPLAY
-      if (blink && print_job_timer.isRunning()) {
+
+  #if ENABLED(DWIN_MARLINUI_PORTRAIT)
+
+    // Portrait mode only shows one value at a time, and will rotate if ROTATE_PROGRESS_DISPLAY
+    dwin_string.set();
+    char prefix = ' ';
+    #if ENABLED(SHOW_REMAINING_TIME)
+      if (TERN1(ROTATE_PROGRESS_DISPLAY, blink) && print_job_timer.isRunning()) {
         time = get_remaining_time();
         prefix = 'R';
-      } else
-    #else
-      if (print_job_timer.isRunning()) {
-        time = get_remaining_time();
-        prefix = 'R';
-      } else
+      }
+      else
     #endif
-  #endif
         time = print_job_timer.duration();
 
-  time.toDigital(buffer);
-  dwin_string.add(prefix);
-  dwin_string.add(buffer);
-  DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, (LCD_PIXEL_WIDTH - ((dwin_string.length() + 1) * 14)), 250, (char*)dwin_string.string());
+    time.toDigital(buffer);
+    dwin_string.add(prefix);
+    dwin_string.add(buffer);
+    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, (LCD_PIXEL_WIDTH - ((dwin_string.length() + 1) * 14)), 250, (char*)dwin_string.string());
+
   #else
-  // landscape mode shows both elapsed and remaining (if SHOW_REMAINING_TIME)
-  // TODO: show E here if it's enabled and rotate with remaining???
-  dwin_string.set();
-  char buffer[14];
-  duration_t time;
-  dwin_string.set(" ");
-  time = print_job_timer.duration();
-  time.toDigital(buffer);
-  dwin_string.add(buffer);
-  DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, 270, 100, (char*)dwin_string.string());
-    #ifdef SHOW_REMAINING_TIME
-    time = get_remaining_time();
-    dwin_string.set("R");
+
+    // landscape mode shows both elapsed and remaining (if SHOW_REMAINING_TIME)
+    // TODO: show E here if it's enabled and rotate with remaining???
+    dwin_string.set(" ");
+    time = print_job_timer.duration();
     time.toDigital(buffer);
     dwin_string.add(buffer);
-    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, 270, 135, (char*)dwin_string.string());
+    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, 270, 100, (char*)dwin_string.string());
+    #if ENABLED(SHOW_REMAINING_TIME)
+      time = get_remaining_time();
+      dwin_string.set("R");
+      time.toDigital(buffer);
+      dwin_string.add(buffer);
+      DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, 270, 135, (char*)dwin_string.string());
     #endif
   #endif
 
   // progress
   const progress_t progress = TERN(HAS_PRINT_PROGRESS_PERMYRIAD, get_progress_permyriad, get_progress_percent)();
 
+  constexpr int16_t leftx = LCD_PIXEL_WIDTH - TERN(DWIN_MARLINUI_PORTRAIT, 0, 107),
+                    botty = TERN(DWIN_MARLINUI_PORTRAIT, 360, 230);
+
   uint16_t pb_width = (LCD_PIXEL_WIDTH - 12 - 107) * (progress / PROGRESS_SCALE * 0.01f);
-  #ifdef DWIN_MARLINUI_PORTRAIT
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, 5, 300, LCD_PIXEL_WIDTH - 5, 360); // 'clear' it first
-  DWIN_Draw_Rectangle(0, Select_Color, 5, 300, LCD_PIXEL_WIDTH - 5, 360);
-  DWIN_Draw_Rectangle(1, Select_Color, 6, 301, 6 + pb_width, 359);
-  #else
-  DWIN_Draw_Rectangle(1, Color_Bg_Black, 5, 170, LCD_PIXEL_WIDTH - 5 - 107, 230); // 'clear' it first
-  DWIN_Draw_Rectangle(0, Select_Color, 5, 170, LCD_PIXEL_WIDTH - 5 - 107, 230);
-  DWIN_Draw_Rectangle(1, Select_Color, 6, 171, 6 + pb_width, 229);
-  #endif
+  DWIN_Draw_Rectangle(1, Color_Bg_Black, 5, botty - 60, leftx - 5, botty); // 'clear' it first
+  DWIN_Draw_Rectangle(0, Select_Color, 5, botty - 60, leftx - 5, botty);
+  DWIN_Draw_Rectangle(1, Select_Color, 6, botty - 60 + 1, 6 + pb_width, botty - 1);
 
   dwin_string.set();
   dwin_string.add(TERN(PRINT_PROGRESS_SHOW_DECIMALS, permyriadtostr4(progress), ui8tostr3rj(progress / (PROGRESS_SCALE))));
   dwin_string.add(PSTR("%"));
   DWIN_Draw_String(
-    false,
-    false,
+    false, false,
     font16x32,
     Percent_Color,
     Color_Bg_Black,
-    #ifdef DWIN_MARLINUI_PORTRAIT
-    6 + ((LCD_PIXEL_WIDTH - 12)/2) - (dwin_string.length() * 16 / 2),
-    300 + 12,
+    #if ENABLED(DWIN_MARLINUI_PORTRAIT)
+      6 + ((leftx - 12) / 2) - (dwin_string.length() * 16 / 2),
+      300 + 12,
     #else
-    6 + ((LCD_PIXEL_WIDTH - 12 - 107)/2) - (dwin_string.length() * 16 / 2),
-    170 + 12,
+      6 + ((leftx - 12) / 2) - (dwin_string.length() * 16 / 2),
+      170 + 12,
     #endif
     (char*)dwin_string.string());
 
   draw_status_message(blink);
 }
 
-#endif
+#endif // IS_DWIN_MARLINUI
