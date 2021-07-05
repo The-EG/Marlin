@@ -69,6 +69,9 @@ extern dwin_font_t dwin_font;
 #endif
 #define MENU_FONT_HEIGHT (MENU_FONT_ASCENT + MENU_FONT_DESCENT)
 
+#define EXTRA_ROW_HEIGHT 8
+#define MENU_LINE_HEIGHT (MENU_FONT_HEIGHT + EXTRA_ROW_HEIGHT)
+
 #if DWIN_FONT_EDIT == font6x12
   #define EDIT_FONT_WIDTH    6
   #define EDIT_FONT_ASCENT  10

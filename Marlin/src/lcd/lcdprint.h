@@ -77,7 +77,7 @@
   #define INFO_FONT_WIDTH   6
 
   #define LCD_COL_X(col) ((    (col)) * (MENU_FONT_WIDTH))
-  #define LCD_ROW_Y(row) ((1 + (row)) * (MENU_FONT_HEIGHT))
+  #define LCD_ROW_Y(row) ((1 + (row)) * (MENU_LINE_HEIGHT))
 
 #elif IS_DWIN_MARLINUI
 
@@ -86,9 +86,7 @@
   #define LCD_PIXEL_WIDTH   DWIN_WIDTH
   #define LCD_PIXEL_HEIGHT  DWIN_HEIGHT
   #define LCD_WIDTH  ((LCD_PIXEL_WIDTH)  / (MENU_FONT_WIDTH))
-  #define LCD_HEIGHT ((LCD_PIXEL_HEIGHT) / (MENU_FONT_HEIGHT))
-
-
+  #define LCD_HEIGHT ((LCD_PIXEL_HEIGHT) / (MENU_LINE_HEIGHT))
 
 #else
 
@@ -111,6 +109,10 @@
   #define SETCURSOR(col, row)    lcd_moveto(LCD_COL_X(col), LCD_ROW_Y(row))
   #define SETCURSOR_RJ(len, row) lcd_moveto(LCD_COL_X_RJ(len), LCD_ROW_Y(row))
 
+#endif
+
+#ifndef MENU_LINE_HEIGHT
+  #define MENU_LINE_HEIGHT MENU_FONT_HEIGHT
 #endif
 
 #define LCD_COL_X_RJ(len)      (LCD_PIXEL_WIDTH - LCD_COL_X(len))

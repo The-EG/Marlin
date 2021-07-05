@@ -43,9 +43,11 @@ struct { int16_t x, y; } cursor;
 
 extern dwin_font_t dwin_font;
 
+void lcd_moveto_xy(const lcd_uint_t x, const lcd_uint_t y) { cursor.x = x; cursor.y = y; }
+
 void lcd_moveto(const lcd_uint_t col, const lcd_uint_t row) {
   cursor.x = col * dwin_font.width;
-  cursor.y = row * dwin_font.height;
+  cursor.y = row * (dwin_font.height + EXTRA_ROW_HEIGHT) + EXTRA_ROW_HEIGHT / 2;
 }
 
 inline void lcd_advance_cursor() { cursor.x += dwin_font.width; }
