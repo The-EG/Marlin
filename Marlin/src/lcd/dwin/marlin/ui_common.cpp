@@ -283,18 +283,19 @@ void MarlinUI::draw_status_message(const bool blink) {
       const int8_t plen = pstr ? utf8_strlen_P(pstr) : 0,
                    vlen = vstr ? utf8_strlen(vstr) : 0;
       if (style & SS_CENTER) {
-        int8_t pad = (LCD_WIDTH - plen - vlen) / 2;
+        int8_t pad = (LCD_WIDTH - 1 - plen - vlen) / 2;
         while(--pad) dwin_string.add(' ');
       }
 
       if (plen) dwin_string.add((uint8_t*)pstr, itemIndex, (uint8_t*)itemString);
       if (vlen) dwin_string.add((uint8_t*)vstr);
       if (style & SS_CENTER) {
-        int8_t pad = (LCD_WIDTH - plen - vlen) / 2;
+        int8_t pad = (LCD_WIDTH - 1 - plen - vlen) / 2;
         while(--pad) dwin_string.add(' ');
       }
 
-      DWIN_Draw_String(false, dwin_font.solid, dwin_font.index, dwin_font.fg, dwin_font.bg, 0, row * dwin_font.height, (char*)dwin_string.string());
+      uint16_t y = row * (dwin_font.height + EXTRA_ROW_HEIGHT) + EXTRA_ROW_HEIGHT / 2;
+      DWIN_Draw_String(false, dwin_font.solid, dwin_font.index, dwin_font.fg, dwin_font.bg, dwin_font.width, y, (char*)dwin_string.string());
     }
   }
 
@@ -305,13 +306,13 @@ void MarlinUI::draw_status_message(const bool blink) {
     set_dwin_text_fg(Color_White);
     if (mark_as_selected(row, sel)) {
       dwin_string.set(pstr, itemIndex, itemString);
-      pixel_len_t n = LCD_WIDTH - dwin_string.length();
+      pixel_len_t n = LCD_WIDTH - 1 - dwin_string.length();
 
       while(--n > 1) dwin_string.add(' ');
 
       dwin_string.add(post_char);
 
-      lcd_moveto(0, row);
+      lcd_moveto(1, row);
       lcd_put_dwin_string();
     }
   }
@@ -332,12 +333,12 @@ void MarlinUI::draw_status_message(const bool blink) {
         //while(--n) dwin_string.add(' ');
         //dwin_string.add(data);
       }
-      lcd_moveto(0, row);
+      lcd_moveto(1, row);
       lcd_put_dwin_string();
       if (vallen) {
         set_dwin_text_fg(Color_Yellow);
         dwin_string.set(data);
-        lcd_moveto(LCD_WIDTH - vallen, row);
+        lcd_moveto(LCD_WIDTH - vallen - 1, row);
         lcd_put_dwin_string();
       }
     }
@@ -395,14 +396,14 @@ void MarlinUI::draw_status_message(const bool blink) {
         dwin_string.set();
         if (isDir) dwin_string.add(LCD_STR_FOLDER);
 
-        uint8_t maxlen = LCD_WIDTH - isDir;
+        uint8_t maxlen = LCD_WIDTH - 1 - isDir;
         dwin_string.add((uint8_t*)ui.scrolled_filename(theCard, maxlen, row, sel), maxlen);
         uint8_t n = maxlen - dwin_string.length();
         while (n > 0) {
           n--;
           dwin_string.add(' ');
         }
-        lcd_moveto(0, row);
+        lcd_moveto(1, row);
         lcd_put_dwin_string();
       }
     }
