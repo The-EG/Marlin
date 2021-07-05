@@ -54,7 +54,7 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
 
   dwin_string.set();
   dwin_string.add('X' + axis);
-  DWIN_Draw_String(false, true, font16x32, Color_IconBlue, Color_Bg_Black, x + (vallen * 14 / 2 ) - 7, y + 2, S(dwin_string.string()));
+  DWIN_Draw_String(true, font16x32, Color_IconBlue, Color_Bg_Black, x + (vallen * 14 / 2 ) - 7, y + 2, S(dwin_string.string()));
 
   dwin_string.set();
   if (blink)
@@ -71,7 +71,7 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
           dwin_string.add(value);
     }
   }
-  DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
+  DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
 }
 
 FORCE_INLINE void _draw_fan_status(uint16_t x, uint16_t y) {
@@ -82,11 +82,11 @@ FORCE_INLINE void _draw_fan_status(uint16_t x, uint16_t y) {
 
   DWIN_ICON_Animation(0, animate, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 28, 25);
   if (animate)
-    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
   else {
     DWIN_ICON_Show(ICON, ICON_Fan0, x + 15, y + 28);
     dwin_string.set(PSTR("    "));
-    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
   }
 }
 
@@ -108,14 +108,14 @@ FORCE_INLINE void _draw_heater_status(const heater_id_t heater, uint16_t x, uint
   dwin_string.set();
   dwin_string.add(i16tostr3rj(t2 + 0.5));
   dwin_string.add(LCD_STR_DEGREE);
-  DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x, y, S(dwin_string.string()));
+  DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y, S(dwin_string.string()));
 
   DWIN_ICON_Show(ICON, (isBed ? ICON_BedOff : ICON_HotendOff) + isActive, x, y + 30);
 
   dwin_string.set();
   dwin_string.add(i16tostr3rj(t1 + 0.5));
   dwin_string.add(LCD_STR_DEGREE);
-  DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
+  DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
 }
 
 /**
@@ -126,12 +126,12 @@ FORCE_INLINE void _draw_feedrate_status(const char *value, uint16_t x, uint16_t 
 
   //dwin_string.set(PSTR(">>"));
   dwin_string.set(LCD_STR_FEEDRATE);
-  DWIN_Draw_String(false, true, font14x28, Color_IconBlue, Color_Bg_Black, x, y, S(dwin_string.string()));
+  DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, x, y, S(dwin_string.string()));
 
   dwin_string.set();
   dwin_string.add(value);
   dwin_string.add(PSTR("%"));
-  DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, x + 14, y, S(dwin_string.string()));
+  DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x + 14, y, S(dwin_string.string()));
 }
 
 /**
@@ -210,7 +210,7 @@ void MarlinUI::draw_status_screen() {
     time.toDigital(buffer);
     dwin_string.add(prefix);
     dwin_string.add(buffer);
-    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, (LCD_PIXEL_WIDTH - ((dwin_string.length() + 1) * 14)), 250, S(dwin_string.string()));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, (LCD_PIXEL_WIDTH - ((dwin_string.length() + 1) * 14)), 250, S(dwin_string.string()));
 
   #else
 
@@ -220,13 +220,13 @@ void MarlinUI::draw_status_screen() {
     time = print_job_timer.duration();
     time.toDigital(buffer);
     dwin_string.add(buffer);
-    DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, 270, 100, S(dwin_string.string()));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 270, 100, S(dwin_string.string()));
     #if ENABLED(SHOW_REMAINING_TIME)
       time = get_remaining_time();
       dwin_string.set("R");
       time.toDigital(buffer);
       dwin_string.add(buffer);
-      DWIN_Draw_String(false, true, font14x28, Color_White, Color_Bg_Black, 270, 135, S(dwin_string.string()));
+      DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 270, 135, S(dwin_string.string()));
     #endif
   #endif
 
@@ -245,7 +245,7 @@ void MarlinUI::draw_status_screen() {
   dwin_string.add(TERN(PRINT_PROGRESS_SHOW_DECIMALS, permyriadtostr4(progress), ui8tostr3rj(progress / (PROGRESS_SCALE))));
   dwin_string.add(PSTR("%"));
   DWIN_Draw_String(
-    false, false,
+    false,
     font16x32,
     Percent_Color,
     Color_Bg_Black,

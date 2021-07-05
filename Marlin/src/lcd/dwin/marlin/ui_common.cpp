@@ -261,7 +261,7 @@ void MarlinUI::draw_status_message(const bool blink) {
       TERN(MENU_HOLLOW_FRAME, 0, 1),
       sel ? Select_Color : Color_Bg_Black,
       0, row_y1,
-      DWIN_WIDTH, MENU_LINE_HEIGHT - 1
+      LCD_PIXEL_WIDTH, MENU_LINE_HEIGHT - 1
     );
     return true;
   }
@@ -271,12 +271,11 @@ void MarlinUI::draw_status_message(const bool blink) {
   void MenuItem_static::draw(const uint8_t row, PGM_P const pstr, const uint8_t style/*=SS_DEFAULT*/, const char * const vstr/*=nullptr*/) {
     // Call mark_as_selected to draw a bigger selection box
     // and draw the text without a background
-
-    ui.set_font(DWIN_FONT_MENU);
-    set_dwin_text_solid(false);
-    set_dwin_text_fg(Color_White);
-
     if (mark_as_selected(row, (bool)(style & SS_INVERT))) {
+      ui.set_font(DWIN_FONT_MENU);
+      set_dwin_text_solid(false);
+      set_dwin_text_fg(Color_White);
+
       dwin_string.set();
       const int8_t plen = pstr ? utf8_strlen_P(pstr) : 0,
                    vlen = vstr ? utf8_strlen(vstr) : 0;
@@ -293,20 +292,21 @@ void MarlinUI::draw_status_message(const bool blink) {
       }
 
       uint16_t y = row * (dwin_font.height + EXTRA_ROW_HEIGHT) + EXTRA_ROW_HEIGHT / 2;
-      DWIN_Draw_String(false, dwin_font.solid, dwin_font.index, dwin_font.fg, dwin_font.bg, dwin_font.width, y, (char*)dwin_string.string());
+      DWIN_Draw_String(dwin_font.solid, dwin_font.index, dwin_font.fg, dwin_font.bg, dwin_font.width, y, (char*)dwin_string.string());
     }
   }
 
   // Draw a generic menu item
   void MenuItemBase::_draw(const bool sel, const uint8_t row, PGM_P const pstr, const char, const char post_char) {
-    ui.set_font(DWIN_FONT_MENU);
-    set_dwin_text_solid(false);
-    set_dwin_text_fg(Color_White);
     if (mark_as_selected(row, sel)) {
+      ui.set_font(DWIN_FONT_MENU);
+      set_dwin_text_solid(false);
+      set_dwin_text_fg(Color_White);
+
       dwin_string.set(pstr, itemIndex, itemString);
       pixel_len_t n = LCD_WIDTH - 1 - dwin_string.length();
 
-      while(--n > 1) dwin_string.add(' ');
+      while (--n > 1) dwin_string.add(' ');
 
       dwin_string.add(post_char);
 
@@ -315,12 +315,15 @@ void MarlinUI::draw_status_message(const bool blink) {
     }
   }
 
+  //
   // Draw a menu item with an editable value
+  //
   void MenuEditItemBase::draw(const bool sel, const uint8_t row, PGM_P const pstr, const char* const data, const bool pgm) {
-    ui.set_font(DWIN_FONT_MENU);
-    set_dwin_text_solid(false);
-    set_dwin_text_fg(Color_White);
     if (mark_as_selected(row, sel)) {
+      ui.set_font(DWIN_FONT_MENU);
+      set_dwin_text_solid(false);
+      set_dwin_text_fg(Color_White);
+
       const uint8_t vallen = (pgm ? utf8_strlen_P(data) : utf8_strlen((char*)data));
       //const uint8_t plen = utf8_strlen_P(pstr);
 
@@ -342,6 +345,9 @@ void MarlinUI::draw_status_message(const bool blink) {
     }
   }
 
+  //
+  // Draw an edit screen with label and current value
+  //
   void MenuEditItemBase::draw_edit_screen(PGM_P const pstr, const char* const value/*=nullptr*/) {
     ui.encoder_direction_normal();
 
@@ -349,7 +355,7 @@ void MarlinUI::draw_status_message(const bool blink) {
 
     dwin_string.set();
     dwin_string.add((uint8_t*)pstr, itemIndex);
-    if (value) dwin_string.add(':');  // If a value is included, add a colon
+    if (vallen) dwin_string.add(':');  // If a value is included, add a colon
 
     // Assume the label is alpha-numeric (with a descender)
     const uint16_t row = (LCD_HEIGHT / 2) - 1;
@@ -360,27 +366,27 @@ void MarlinUI::draw_status_message(const bool blink) {
     lcd_put_dwin_string();
 
     // If a value is included, print the value in larger text below the label
-    if (value != nullptr) {
+    if (vallen) {
       dwin_string.set();
       dwin_string.add(value);
 
-      const uint16_t by = LCD_ROW_Y(row + 1);
-      DWIN_Draw_String(false, true, font16x32, Color_IconBlue, Color_Bg_Black, (LCD_PIXEL_WIDTH - vallen * 16) / 2, by, (char*)dwin_string.string());
+      const dwin_coord_t by = LCD_ROW_Y(row) + MENU_FONT_HEIGHT + 4;
+      DWIN_Draw_String(true, font16x32, Color_Yellow, Color_Bg_Black, (LCD_PIXEL_WIDTH - vallen * 16) / 2, by, (char*)dwin_string.string());
 
       extern screenFunc_t _manual_move_func_ptr;
       if (ui.currentScreen != _manual_move_func_ptr && !ui.external_control) {
 
-        #define SLIDER_LENGTH (LCD_PIXEL_WIDTH - TERN(DWIN_MARLINUI_LANDSCAPE, 120, 20))
-        #define SLIDER_HEIGHT 16
-        #define SLIDER_X ((LCD_PIXEL_WIDTH - SLIDER_LENGTH) / 2)
-        #define SLIDER_Y (by + 36)
+        const dwin_coord_t slider_length = LCD_PIXEL_WIDTH - TERN(DWIN_MARLINUI_LANDSCAPE, 120, 20),
+                           slider_height = 16,
+                           slider_x = (LCD_PIXEL_WIDTH - slider_length) / 2,
+                           slider_y = by + 32 + 4,
+                           amount = ui.encoderPosition * slider_length / maxEditValue;
 
-        const int16_t amount = ui.encoderPosition * SLIDER_LENGTH / maxEditValue;
-        DWIN_Draw_Rectangle(1, Color_Bg_Window, SLIDER_X - 1, SLIDER_Y - 1, SLIDER_X - 1 + SLIDER_LENGTH + 2 - 1, SLIDER_Y - 1 + SLIDER_HEIGHT + 2 - 1);
+        DWIN_Draw_Rectangle(1, Color_Bg_Window, slider_x - 1, slider_y - 1, slider_x - 1 + slider_length + 2 - 1, slider_y - 1 + slider_height + 2 - 1);
         if (amount > 0)
-          DWIN_Draw_Box(1, BarFill_Color, SLIDER_X, SLIDER_Y, amount, SLIDER_HEIGHT);
-        if (amount < SLIDER_LENGTH)
-          DWIN_Draw_Box(1, Color_Bg_Black, SLIDER_X + amount, SLIDER_Y, SLIDER_LENGTH - amount, SLIDER_HEIGHT);
+          DWIN_Draw_Box(1, BarFill_Color, slider_x, slider_y, amount, slider_height);
+        if (amount < slider_length)
+          DWIN_Draw_Box(1, Color_Bg_Black, slider_x + amount, slider_y, slider_length - amount, slider_height);
       }
     }
   }
@@ -455,13 +461,10 @@ void MarlinUI::draw_status_message(const bool blink) {
                                                                     // invert the Y to get it to plot in the right location.
 
       const dwin_coord_t by = y_offset + y_plot_inv * pixels_per_y_mesh_pnt;
-      DWIN_Draw_Rectangle(1,
-        Select_Color,
-        x_offset + (x_plot * pixels_per_x_mesh_pnt),
-        by,
-        x_offset + (x_plot * pixels_per_x_mesh_pnt) + pixels_per_x_mesh_pnt,
-        by + pixels_per_y_mesh_pnt);
-
+      DWIN_Draw_Rectangle(1, Select_Color,
+        x_offset + (x_plot * pixels_per_x_mesh_pnt), by,
+        x_offset + (x_plot * pixels_per_x_mesh_pnt) + pixels_per_x_mesh_pnt, by + pixels_per_y_mesh_pnt
+      );
 
       // Display Mesh Point Locations
       //set_dwin_text_fg(Color_White);
