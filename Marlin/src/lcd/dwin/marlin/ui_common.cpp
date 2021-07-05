@@ -325,13 +325,13 @@ void MarlinUI::draw_status_message(const bool blink) {
     set_dwin_text_fg(Color_White);
     if (mark_as_selected(row, sel)) {
       const uint8_t vallen = (pgm ? utf8_strlen_P(data) : utf8_strlen((char*)data));
-      const uint8_t plen = utf8_strlen_P(pstr);
+      //const uint8_t plen = utf8_strlen_P(pstr);
 
       dwin_string.set(pstr, itemIndex, itemString);
       if (vallen) {
-        dwin_string.add(": ");
-        uint8_t n = LCD_WIDTH - plen - 2 - vallen;
-        while(--n) dwin_string.add(' ');
+        dwin_string.add(':');
+        //uint8_t n = LCD_WIDTH - plen - 2 - vallen;
+        //while(--n) dwin_string.add(' ');
         //dwin_string.add(data);
       }
       lcd_moveto(0, row);
@@ -372,6 +372,7 @@ void MarlinUI::draw_status_message(const bool blink) {
       dwin_string.set();
       dwin_string.add(value);
       lcd_moveto(LCD_WIDTH - vallen - 1, row);
+      set_dwin_text_fg(Color_Yellow);
       lcd_put_dwin_string();
     }
   }
