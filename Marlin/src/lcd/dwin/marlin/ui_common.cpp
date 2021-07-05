@@ -346,28 +346,42 @@ void MarlinUI::draw_status_message(const bool blink) {
     ui.encoder_direction_normal();
 
     const dwin_coord_t labellen = utf8_strlen_P(pstr), vallen = utf8_strlen(value);
-    bool extra_row = labellen > LCD_WIDTH - 2 - vallen;
-
-    // Assume the label is alpha-numeric (with a descender)
-
-    uint16_t row = extra_row ? (LCD_HEIGHT / 2 - 1) : (LCD_HEIGHT / 2);
-    set_dwin_text_fg(Color_White);
-    set_dwin_text_solid(true);
 
     dwin_string.set();
     dwin_string.add((uint8_t*)pstr, itemIndex);
-    if (value) dwin_string.add(':');
-    lcd_moveto(0, row);
+    if (value) dwin_string.add(':');  // If a value is included, add a colon
+
+    // Assume the label is alpha-numeric (with a descender)
+    const uint16_t row = (LCD_HEIGHT / 2) - 1;
+
+    set_dwin_text_fg(Color_White);
+    set_dwin_text_solid(true);
+    lcd_moveto((LCD_WIDTH - labellen + !!vallen) / 2, row);
     lcd_put_dwin_string();
 
-    // If a value is included, print a colon, then print the value right-justified
+    // If a value is included, print the value in larger text below the label
     if (value != nullptr) {
-      if (extra_row) row++;
       dwin_string.set();
       dwin_string.add(value);
-      lcd_moveto(LCD_WIDTH - vallen - 1, row);
-      set_dwin_text_fg(Color_Yellow);
-      lcd_put_dwin_string();
+
+      const uint16_t by = LCD_ROW_Y(row + 1);
+      DWIN_Draw_String(false, true, font16x32, Color_IconBlue, Color_Bg_Black, (LCD_PIXEL_WIDTH - vallen * 16) / 2, by, (char*)dwin_string.string());
+
+      extern screenFunc_t _manual_move_func_ptr;
+      if (ui.currentScreen != _manual_move_func_ptr && !ui.external_control) {
+
+        #define SLIDER_LENGTH (LCD_PIXEL_WIDTH - TERN(DWIN_MARLINUI_LANDSCAPE, 120, 20))
+        #define SLIDER_HEIGHT 16
+        #define SLIDER_X ((LCD_PIXEL_WIDTH - SLIDER_LENGTH) / 2)
+        #define SLIDER_Y (by + 36)
+
+        const int16_t amount = ui.encoderPosition * SLIDER_LENGTH / maxEditValue;
+        DWIN_Draw_Rectangle(1, Color_Bg_Window, SLIDER_X - 1, SLIDER_Y - 1, SLIDER_X - 1 + SLIDER_LENGTH + 2 - 1, SLIDER_Y - 1 + SLIDER_HEIGHT + 2 - 1);
+        if (amount > 0)
+          DWIN_Draw_Box(1, BarFill_Color, SLIDER_X, SLIDER_Y, amount, SLIDER_HEIGHT);
+        if (amount < SLIDER_LENGTH)
+          DWIN_Draw_Box(1, Color_Bg_Black, SLIDER_X + amount, SLIDER_Y, SLIDER_LENGTH - amount, SLIDER_HEIGHT);
+      }
     }
   }
 
