@@ -30,7 +30,7 @@
 
 #if IS_DWIN_MARLINUI
 
-#include "marlinui_dwin.h"
+#include "lcdprint_dwin.h"
 #include "../dwin_lcd.h"
 #include "../dwin_string.h"
 
@@ -47,7 +47,7 @@ void lcd_moveto_xy(const lcd_uint_t x, const lcd_uint_t y) { cursor.x = x; curso
 
 void lcd_moveto(const lcd_uint_t col, const lcd_uint_t row) {
   cursor.x = col * dwin_font.width;
-  cursor.y = row * (dwin_font.height + EXTRA_ROW_HEIGHT) + EXTRA_ROW_HEIGHT / 2;
+  cursor.y = LCD_ROW_Y(row);
 }
 
 inline void lcd_advance_cursor() { cursor.x += dwin_font.width; }

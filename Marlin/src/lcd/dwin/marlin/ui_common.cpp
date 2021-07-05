@@ -114,8 +114,6 @@ void MarlinUI::clear_lcd() {
 
 #endif
 
-void lcd_moveto_xy(const lcd_uint_t x, const lcd_uint_t y);
-
 // The kill screen is displayed for unrecoverable conditions
 void MarlinUI::draw_kill_screen() {
   set_font(DWIN_FONT_ALERT);
@@ -128,8 +126,8 @@ void MarlinUI::draw_kill_screen() {
   DWIN_Draw_Rectangle(0, Color_Yellow, 21, 21, LCD_PIXEL_WIDTH - 21, LCD_PIXEL_HEIGHT - 21);
   DWIN_Draw_Rectangle(0, Color_Yellow, 22, 22, LCD_PIXEL_WIDTH - 22, LCD_PIXEL_HEIGHT - 22);
 
-  uint8_t cx = (LCD_PIXEL_WIDTH / dwin_font.width / 2);
-  uint8_t cy = (LCD_PIXEL_HEIGHT / dwin_font.height / 2);
+  uint8_t cx = (LCD_PIXEL_WIDTH / dwin_font.width / 2),
+          cy = (LCD_PIXEL_HEIGHT / dwin_font.height / 2);
 
   #if ENABLED(DWIN_MARLINUI_LANDSCAPE)
     cx += (48 / dwin_font.width);
@@ -346,8 +344,6 @@ void MarlinUI::draw_status_message(const bool blink) {
 
   void MenuEditItemBase::draw_edit_screen(PGM_P const pstr, const char* const value/*=nullptr*/) {
     ui.encoder_direction_normal();
-    set_dwin_text_fg(Color_White);
-    set_dwin_text_solid(true);
 
     const dwin_coord_t labellen = utf8_strlen_P(pstr), vallen = utf8_strlen(value);
     bool extra_row = labellen > LCD_WIDTH - 2 - vallen;
@@ -355,6 +351,7 @@ void MarlinUI::draw_status_message(const bool blink) {
     // Assume the label is alpha-numeric (with a descender)
 
     uint16_t row = extra_row ? (LCD_HEIGHT / 2 - 1) : (LCD_HEIGHT / 2);
+    set_dwin_text_fg(Color_White);
     set_dwin_text_solid(true);
 
     dwin_string.set();
@@ -469,20 +466,14 @@ void MarlinUI::draw_status_message(const bool blink) {
                      lpos = pos.asLogical();
 
       lcd_moveto(
-        #if ENABLED(DWIN_MARLINUI_LANDSCAPE)
-          ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1
-        #else
-          1, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 1
-        #endif
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1)
+        TERN(DWIN_MARLINUI_LANDSCAPE, 1, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 1)
       );
       lcd_put_u8str_P(X_LBL);
       lcd_put_u8str(ftostr52(lpos.x));
       lcd_moveto(
-        #if ENABLED(DWIN_MARLINUI_LANDSCAPE)
-          ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 3
-        #else
-          1, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 2
-        #endif
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1)
+        TERN(DWIN_MARLINUI_LANDSCAPE, 3, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 2)
       );
       lcd_put_u8str_P(Y_LBL);
       lcd_put_u8str(ftostr52(lpos.y));
@@ -494,11 +485,8 @@ void MarlinUI::draw_status_message(const bool blink) {
       dwin_string.add(i8tostr3rj(y_plot));
       dwin_string.add(")");
       lcd_moveto(
-        #if ENABLED(DWIN_MARLINUI_LANDSCAPE)
-          ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_HEIGHT - 2
-        #else
-          LCD_WIDTH - dwin_string.length(), ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 1
-        #endif
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_WIDTH - dwin_string.length())
+        TERN(DWIN_MARLINUI_LANDSCAPE, LCD_HEIGHT - 2, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 1)
       );
       lcd_put_dwin_string();
 
@@ -509,11 +497,8 @@ void MarlinUI::draw_status_message(const bool blink) {
       else
         dwin_string.add(PSTR(" -----"));
       lcd_moveto(
-        #if ENABLED(DWIN_MARLINUI_LANDSCAPE)
-          ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_HEIGHT - 1
-        #else
-          LCD_WIDTH - dwin_string.length(), ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 2
-        #endif
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_WIDTH - dwin_string.length())
+        TERN(DWIN_MARLINUI_LANDSCAPE, LCD_HEIGHT - 1, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 2)
       );
       lcd_put_dwin_string();
     }
