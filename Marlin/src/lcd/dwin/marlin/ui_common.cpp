@@ -483,13 +483,13 @@ void MarlinUI::draw_status_message(const bool blink) {
                      lpos = pos.asLogical();
 
       lcd_moveto(
-        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1)
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1),
         TERN(DWIN_MARLINUI_LANDSCAPE, 1, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 1)
       );
       lcd_put_u8str_P(X_LBL);
       lcd_put_u8str(ftostr52(lpos.x));
       lcd_moveto(
-        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1)
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, 1),
         TERN(DWIN_MARLINUI_LANDSCAPE, 3, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 2)
       );
       lcd_put_u8str_P(Y_LBL);
@@ -502,7 +502,7 @@ void MarlinUI::draw_status_message(const bool blink) {
       dwin_string.add(i8tostr3rj(y_plot));
       dwin_string.add(")");
       lcd_moveto(
-        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_WIDTH - dwin_string.length())
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_WIDTH - dwin_string.length()),
         TERN(DWIN_MARLINUI_LANDSCAPE, LCD_HEIGHT - 2, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 1)
       );
       lcd_put_dwin_string();
@@ -514,7 +514,7 @@ void MarlinUI::draw_status_message(const bool blink) {
       else
         dwin_string.add(PSTR(" -----"));
       lcd_moveto(
-        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_WIDTH - dwin_string.length())
+        TERN(DWIN_MARLINUI_LANDSCAPE, ((x_offset + x_map_pixels) / MENU_FONT_WIDTH) + 2, LCD_WIDTH - dwin_string.length()),
         TERN(DWIN_MARLINUI_LANDSCAPE, LCD_HEIGHT - 1, ((y_offset + y_map_pixels) / MENU_LINE_HEIGHT) + 2)
       );
       lcd_put_dwin_string();
