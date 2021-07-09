@@ -122,9 +122,6 @@ FORCE_INLINE void _draw_heater_status(const heater_id_t heater, uint16_t x, uint
  * Draw the current "feed rate" percentage preceded by the >> character
  */
 FORCE_INLINE void _draw_feedrate_status(const char *value, uint16_t x, uint16_t y) {
-  //DWIN_ICON_Show(ICON, ICON_Setspeed, x, y + 4);
-
-  //dwin_string.set(PSTR(">>"));
   dwin_string.set(LCD_STR_FEEDRATE);
   DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, x, y, S(dwin_string.string()));
 

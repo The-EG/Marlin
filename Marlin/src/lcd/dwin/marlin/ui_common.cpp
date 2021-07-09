@@ -151,7 +151,6 @@ void MarlinUI::draw_kill_screen() {
 
 void MarlinUI::draw_status_message(const bool blink) {
 
-  //lcd_moveto(0, (LCD_HEIGHT) - 1);
   set_font(DWIN_FONT_STAT);
   set_dwin_text_solid(true);
   set_dwin_text_fg(Color_White);
@@ -165,14 +164,12 @@ void MarlinUI::draw_status_message(const bool blink) {
     uint8_t slen = utf8_strlen(status_message);
 
     // If the string fits into the LCD, just print it and do not scroll it
-    //if (slen <= LCD_WIDTH) {
     if (slen <= (LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH)) {
 
       // The string isn't scrolling and may not fill the screen
       lcd_put_u8str(status_message);
 
       // Fill the rest with spaces
-      //while (slen < LCD_WIDTH) { lcd_put_wchar(' '); ++slen; }
       while (slen < (LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH)) { lcd_put_wchar(' '); ++slen; }
     }
     else {
@@ -182,15 +179,12 @@ void MarlinUI::draw_status_message(const bool blink) {
       // and the string remaining length
       uint8_t rlen;
       const char *stat = status_and_len(rlen);
-      //lcd_put_u8str_max(stat, LCD_WIDTH);     // The string leaves space
       lcd_put_u8str_max(stat, (LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH));
 
       // If the remaining string doesn't completely fill the screen
-      //if (rlen < LCD_WIDTH) {
       if (rlen < (LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH)) {
         lcd_put_wchar('.');                   // Always at 1+ spaces left, draw a dot
-        //uint8_t chars = LCD_WIDTH - rlen;     // Amount of space left in characters
-        uint8_t chars = ((LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH)) - rlen;
+        uint8_t chars = ((LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH)) - rlen;  // Amount of space left in characters
         if (--chars) {                        // Draw a second dot if there's space
           lcd_put_wchar('.');
           if (--chars)
@@ -211,11 +205,9 @@ void MarlinUI::draw_status_message(const bool blink) {
     uint8_t slen = utf8_strlen(status_message);
 
     // Just print the string to the LCD
-    //lcd_put_u8str_max(status_message, LCD_WIDTH);
     lcd_put_u8str_max(status_message, (LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH));
 
     // Fill the rest with spaces if there are missing spaces
-    //while (slen < LCD_WIDTH) {
     while (slen < (LCD_PIXEL_WIDTH) / (STAT_FONT_WIDTH)) {
       lcd_put_wchar(' ');
       ++slen;
@@ -325,14 +317,10 @@ void MarlinUI::draw_status_message(const bool blink) {
       set_dwin_text_fg(Color_White);
 
       const uint8_t vallen = (pgm ? utf8_strlen_P(data) : utf8_strlen((char*)data));
-      //const uint8_t plen = utf8_strlen_P(pstr);
 
       dwin_string.set(pstr, itemIndex, itemString);
       if (vallen) {
         dwin_string.add(':');
-        //uint8_t n = LCD_WIDTH - plen - 2 - vallen;
-        //while(--n) dwin_string.add(' ');
-        //dwin_string.add(data);
       }
       lcd_moveto(1, row);
       lcd_put_dwin_string();
