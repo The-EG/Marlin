@@ -131,9 +131,9 @@ void MarlinUI::draw_kill_screen() {
 
   #if ENABLED(DWIN_MARLINUI_LANDSCAPE)
     cx += (48 / dwin_font.width);
-    DWIN_ICON_Show(ICON, ICON_WarningError, 40, (LCD_PIXEL_HEIGHT / 2) - 48);
+    DWIN_ICON_Show(ICON, ICON_Halted, 40, (LCD_PIXEL_HEIGHT / 2) - 48);
   #else
-    DWIN_ICON_Show(ICON, ICON_WarningError, (LCD_PIXEL_WIDTH / 2) - 48, 40);
+    DWIN_ICON_Show(ICON, ICON_Halted, (LCD_PIXEL_WIDTH / 2) - 48, 40);
   #endif
 
   uint8_t slen = utf8_strlen(status_message);
@@ -467,7 +467,6 @@ void MarlinUI::draw_status_message(const bool blink) {
       );
 
       // Display Mesh Point Locations
-      //set_dwin_text_fg(Color_White);
       const dwin_coord_t sx = x_offset + pixels_per_x_mesh_pnt / 2;
             dwin_coord_t  y = y_offset + pixels_per_y_mesh_pnt / 2;
       for (uint8_t j = 0; j < GRID_MAX_POINTS_Y; j++, y += pixels_per_y_mesh_pnt)
@@ -522,14 +521,7 @@ void MarlinUI::draw_status_message(const bool blink) {
 
   #endif // AUTO_BED_LEVELING_UBL
 
-  #if EITHER(BABYSTEP_ZPROBE_GFX_OVERLAY, MESH_EDIT_GFX_OVERLAY)
-
-    // cw_bmp = DWIN_BITMAP_CLOCKWISE;
-    // ccw_bmp = DWIN_BITMAP_COUNTERCLOCKWISE;
-    // up_arrow_bmp = DWIN_UP_ARROW;
-    // down_arrow_bmp = DWIN_DOWN_ARROW;
-    // offset_bedline_bmp = DWIN_BEDLINE;
-    // nozzle_bmp = DWIN_NOZZLE;
+  #if ANY(BABYSTEP_ZPROBE_GFX_OVERLAY, MESH_EDIT_GFX_OVERLAY, BABYSTEP_GFX_OVERLAY)
 
     void _lcd_zoffset_overlay_gfx(const float zvalue) {
       // Determine whether the user is raising or lowering the nozzle.
@@ -540,26 +532,23 @@ void MarlinUI::draw_status_message(const bool blink) {
         old_zvalue = zvalue;
       }
 
-      #if 0
-      const unsigned char *rot_up = TERN(OVERLAY_GFX_REVERSE, ccw_bmp, cw_bmp),
-                        *rot_down = TERN(OVERLAY_GFX_REVERSE, cw_bmp, ccw_bmp);
+      const int rot_up = TERN(OVERLAY_GFX_REVERSE, ICON_RotateCCW, ICON_RotateCW),
+                rot_down = TERN(OVERLAY_GFX_REVERSE, ICON_RotateCW, ICON_RotateCCW);
 
-      #if ENABLED(USE_BIG_EDIT_FONT)
-        const int left = 0, right = 45, nozzle = 95;
-      #else
-        const int left = 5, right = 90, nozzle = 60;
-      #endif
+      const int nozzle = (LCD_PIXEL_WIDTH / 2) - 20;
 
       // Draw a representation of the nozzle
-      u8g.drawBitmapP(nozzle + 6, 4 - dir, 2, 12, nozzle_bmp);
-      u8g.drawBitmapP(nozzle + 0, 20, 3, 1, offset_bedline_bmp);
+      DWIN_Draw_Box(1, Color_Bg_Black, nozzle + 6, 8, 48, 52); // 'clear' the area where the nozzle is drawn in case it was moved up/down
+      DWIN_ICON_Show(ICON, ICON_HotendOff, nozzle + 6, 10 - dir);
+      DWIN_ICON_Show(ICON, ICON_BedLine, nozzle, 10 + 36);
 
-      // Draw cw/ccw indicator and up/down arrows.
-      u8g.drawBitmapP(right + 0, 48 - dir, 2, 13, up_arrow_bmp);
-      u8g.drawBitmapP(left  + 0, 49 - dir, 2, 13, down_arrow_bmp);
-      u8g.drawBitmapP(left  + 13, 47, 3, 16, rot_down);
-      u8g.drawBitmapP(right + 13, 47, 3, 16, rot_up);
-      #endif
+      // Draw cw/ccw indicator and up/down arrows
+      const int arrow_y = LCD_PIXEL_HEIGHT / 2 - 24;
+      DWIN_ICON_Show(ICON, ICON_DownArrow, 0, arrow_y - dir);
+      DWIN_ICON_Show(ICON, rot_down, 48, arrow_y);
+
+      DWIN_ICON_Show(ICON, ICON_UpArrow, LCD_PIXEL_WIDTH - 10 - (48*2), arrow_y - dir);
+      DWIN_ICON_Show(ICON, rot_up, LCD_PIXEL_WIDTH - 10 - 48, arrow_y);
     }
 
   #endif // BABYSTEP_ZPROBE_GFX_OVERLAY || MESH_EDIT_GFX_OVERLAY

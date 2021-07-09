@@ -80,11 +80,11 @@ FORCE_INLINE void _draw_fan_status(uint16_t x, uint16_t y) {
   dwin_string.add('%');
   const bool animate = thermalManager.scaledFanSpeedPercent(0) > 0;
 
-  DWIN_ICON_Animation(0, animate, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 28, 25);
+  DWIN_ICON_Animation(0, animate, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 18, 25);
   if (animate)
     DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
   else {
-    DWIN_ICON_Show(ICON, ICON_Fan0, x + 15, y + 28);
+    DWIN_ICON_Show(ICON, ICON_Fan0, x + 15, y + 18);
     dwin_string.set(PSTR("    "));
     DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
   }
