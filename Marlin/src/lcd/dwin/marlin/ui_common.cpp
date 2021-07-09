@@ -526,8 +526,8 @@ void MarlinUI::draw_status_message(const bool blink) {
       const int nozzle = (LCD_PIXEL_WIDTH / 2) - 20;
 
       // Draw a representation of the nozzle
-      DWIN_Draw_Box(1, Color_Bg_Black, nozzle + 6, 8, 48, 52); // 'clear' the area where the nozzle is drawn in case it was moved up/down
-      DWIN_ICON_Show(ICON, ICON_HotendOff, nozzle + 6, 10 - dir);
+      DWIN_Draw_Box(1, Color_Bg_Black, nozzle + 3, 8, 48, 52); // 'clear' the area where the nozzle is drawn in case it was moved up/down
+      DWIN_ICON_Show(ICON, ICON_HotendOff, nozzle + 3, 10 - dir);
       DWIN_ICON_Show(ICON, ICON_BedLine, nozzle, 10 + 36);
 
       // Draw cw/ccw indicator and up/down arrows
