@@ -79,8 +79,8 @@
   #define ICON_Alert                11
   #define ICON_RotateCW             12
   #define ICON_RotateCCW            13
-  #define ICON_DownArrow            14
-  #define ICON_UpArrow              15
+  #define ICON_UpArrow              14
+  #define ICON_DownArrow            15
   #define ICON_BedLine              16
 #else
   #define ICON_LOGO                  0
