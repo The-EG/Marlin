@@ -74,14 +74,14 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
   DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
 }
 
-FORCE_INLINE void _draw_fan_status(uint16_t x, uint16_t y) {
+FORCE_INLINE void _draw_fan_status(const uint16_t x, const uint16_t y) {
   dwin_string.set();
   dwin_string.add(i8tostr3rj(thermalManager.scaledFanSpeedPercent(0)));
   dwin_string.add('%');
-  const bool animate = thermalManager.scaledFanSpeedPercent(0) > 0;
+  const bool fan_on = thermalManager.scaledFanSpeedPercent(0) > 0;
 
-  DWIN_ICON_Animation(0, animate, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 18, 25);
-  if (animate)
+  DWIN_ICON_Animation(0, fan_on, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 18, 25);
+  if (fan_on)
     DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
   else {
     DWIN_ICON_Show(ICON, ICON_Fan0, x + 15, y + 18);
@@ -149,9 +149,7 @@ void MarlinUI::draw_status_screen() {
   #endif
 
   // Fan display
-  #if HAS_FAN
-    _draw_fan_status(175, 60);
-  #endif
+  TERN_(HAS_FAN, _draw_fan_status(175, 52));
 
   // Draw a frame around the x/y/z values
   DWIN_Draw_Rectangle(0, Select_Color,
