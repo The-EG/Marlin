@@ -34,7 +34,21 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if HAS_MARLINUI_U8GLIB
+#if IS_DWIN_MARLINUI
+
+  #include "dwin/marlin/marlinui_dwin.h"
+
+  #define LCD_PIXEL_WIDTH     DWIN_WIDTH
+  #define LCD_PIXEL_HEIGHT    DWIN_HEIGHT
+  #define LCD_WIDTH           ((LCD_PIXEL_WIDTH)  / (MENU_FONT_WIDTH))
+  #define LCD_HEIGHT          ((LCD_PIXEL_HEIGHT) / (MENU_LINE_HEIGHT))
+
+  // The DWIN lcd_moveto function uses row / column, not pixels
+  #define LCD_COL_X(col)      (col)
+  #define LCD_ROW_Y(row)      (row)
+  #define LCD_COL_X_RJ(len)   (LCD_WIDTH - LCD_COL_X(len))
+
+#elif HAS_MARLINUI_U8GLIB
 
   #include "dogm/u8g_fontutf8.h"
   typedef u8g_uint_t lcd_uint_t;
@@ -76,17 +90,10 @@
   #define INFO_FONT_HEIGHT (INFO_FONT_ASCENT + INFO_FONT_DESCENT)
   #define INFO_FONT_WIDTH   6
 
+  // Graphical LCD uses the menu font size for cursor positioning
   #define LCD_COL_X(col) ((    (col)) * (MENU_FONT_WIDTH))
   #define LCD_ROW_Y(row) ((1 + (row)) * (MENU_LINE_HEIGHT))
-
-#elif IS_DWIN_MARLINUI
-
-  #include "dwin/marlin/marlinui_dwin.h"
-
-  #define LCD_PIXEL_WIDTH   DWIN_WIDTH
-  #define LCD_PIXEL_HEIGHT  DWIN_HEIGHT
-  #define LCD_WIDTH  ((LCD_PIXEL_WIDTH)  / (MENU_FONT_WIDTH))
-  #define LCD_HEIGHT ((LCD_PIXEL_HEIGHT) / (MENU_LINE_HEIGHT))
+  #define LCD_COL_X_RJ(len) (LCD_WIDTH - LCD_COL_X(len))
 
 #else
 
@@ -103,11 +110,10 @@
   #define LCD_PIXEL_WIDTH   LCD_WIDTH
   #define LCD_PIXEL_HEIGHT  LCD_HEIGHT
 
+  // Character LCD uses direct cursor positioning
   #define LCD_COL_X(col) (col)
   #define LCD_ROW_Y(row) (row)
-
-  #define SETCURSOR(col, row)    lcd_moveto(LCD_COL_X(col), LCD_ROW_Y(row))
-  #define SETCURSOR_RJ(len, row) lcd_moveto(LCD_COL_X_RJ(len), LCD_ROW_Y(row))
+  #define LCD_COL_X_RJ(len) (LCD_PIXEL_WIDTH - LCD_COL_X(len))
 
 #endif
 
@@ -115,10 +121,8 @@
   #define MENU_LINE_HEIGHT MENU_FONT_HEIGHT
 #endif
 
-#define LCD_COL_X_RJ(len)      (LCD_PIXEL_WIDTH - LCD_COL_X(len))
-#define LCD_BOTTOM_ROW         (LCD_PIXEL_HEIGHT - 1)
-#define SETCURSOR(col, row)    lcd_moveto(col, row)
-#define SETCURSOR_RJ(len, row) SETCURSOR(LCD_WIDTH - (len), row)
+#define SETCURSOR(col, row)    lcd_moveto(LCD_COL_X(col), LCD_ROW_Y(row))
+#define SETCURSOR_RJ(len, row) lcd_moveto(LCD_COL_X_RJ(len), LCD_ROW_Y(row))
 #define SETCURSOR_X(col)       SETCURSOR(col, _lcdLineNr)
 #define SETCURSOR_X_RJ(len)    SETCURSOR_RJ(len, _lcdLineNr)
 

@@ -128,11 +128,8 @@ void DWIN_Startup(void) {
   const bool success = DWIN_Handshake();
   if (success) DEBUG_ECHOLNPGM("ok."); else DEBUG_ECHOLNPGM("error.");
   DWIN_Frame_SetDir(DISABLED(DWIN_MARLINUI_LANDSCAPE) ? 1 : 0);
-  #if IS_DWIN_MARLINUI
-    // we take care of the boot screen in MarlinUI, so just clear the screen for now
-    DWIN_Frame_Clear(Color_Bg_Black);
-  #else
-    TERN(SHOW_BOOTSCREEN,,DWIN_Frame_Clear(Color_Bg_Black));
+  #if IS_DWIN_MARLINUI || DISABLED(SHOW_BOOTSCREEN)
+    DWIN_Frame_Clear(Color_Bg_Black); // MarlinUI handles the bootscreen so just clear here
   #endif
   DWIN_UpdateLCD();
 }
