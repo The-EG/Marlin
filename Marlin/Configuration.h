@@ -2733,9 +2733,6 @@
 
 //
 // Touch Screen Settings
-
-//
-// ADS7843/XPT2046 ADC Touchscreen such as ILI9341 2.8
 //
 //#define TOUCH_SCREEN
 #if ENABLED(TOUCH_SCREEN)
