@@ -30,7 +30,7 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if ANY(DWIN_CREALITY_LCD, IS_DWIN_MARLINUI)
+#if EITHER(DWIN_CREALITY_LCD, IS_DWIN_MARLINUI)
 
 #include "../../inc/MarlinConfig.h"
 
