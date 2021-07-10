@@ -1,5 +1,5 @@
 # Generate a 'HZK' font file for the T5UIC1 DWIN LCD
-# from multiple bdf font files. 
+# from multiple bdf font files.
 # Note: the 16x16 glyphs are not produced
 # Author: Taylor Talkington
 # License: GPL
@@ -16,7 +16,7 @@ def glyph_bits(size_x, size_y, font, glyph_ord):
     try:
         glyph = font[glyph_ord]
         for y, row in enumerate(glyph.data):
-            v = row 
+            v = row
             rpad = size_x - glyph.bbW
             if rpad < 0: rpad = 0
             if glyph.bbW > size_x: v = v >> (glyph.bbW - size_x) # some glyphs are actually too wide to fit!
@@ -51,11 +51,11 @@ def marlin_font_hzk():
                 for glyph in range(128):
                     bits = glyph_bits(f[0], f[1], font, glyph)
                     glyph_bytes = math.ceil(f[0]/8)
-                    
+
                     for b in bits:
                         try:
-                            z = b.to_bytes(glyph_bytes, 'big') 
-                            output.write(z) 
+                            z = b.to_bytes(glyph_bytes, 'big')
+                            output.write(z)
                         except OverflowError:
                             print('Overflow')
                             print(f'{glyph}')
