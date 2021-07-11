@@ -25,5 +25,3 @@
 
 int lcd_put_dwin_string();
 void lcd_moveto_xy(const lcd_uint_t, const lcd_uint_t);
-
-#define LCD_ROW_Y(R) ((R) * MENU_LINE_HEIGHT + EXTRA_ROW_HEIGHT / 2)

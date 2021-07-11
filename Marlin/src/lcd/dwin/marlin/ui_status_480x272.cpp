@@ -75,18 +75,19 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
 }
 
 FORCE_INLINE void _draw_fan_status(const uint16_t x, const uint16_t y) {
-  dwin_string.set();
-  dwin_string.add(i8tostr3rj(thermalManager.scaledFanSpeedPercent(0)));
-  dwin_string.add('%');
-  const bool fan_on = thermalManager.scaledFanSpeedPercent(0) > 0;
+  const uint8_t fan_pct = thermalManager.scaledFanSpeedPercent(0);
+  const bool fan_on = !!fan_pct;
 
-  DWIN_ICON_Animation(0, fan_on, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 18, 25);
-  if (fan_on)
-    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
+  DWIN_ICON_Animation(0, fan_on, ICON, ICON_Fan0, ICON_Fan3, x + 15, y + 12, 25);
+  if (fan_on) {
+    dwin_string.set(i8tostr3rj(fan_pct));
+    dwin_string.add('%');
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 60 + 12, S(dwin_string.string()));
+  }
   else {
-    DWIN_ICON_Show(ICON, ICON_Fan0, x + 15, y + 18);
+    DWIN_ICON_Show(ICON, ICON_Fan0, x + 15, y + 12);
     dwin_string.set(PSTR("    "));
-    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 60 + 12, S(dwin_string.string()));
   }
 }
 
@@ -105,15 +106,13 @@ FORCE_INLINE void _draw_heater_status(const heater_id_t heater, uint16_t x, uint
     const uint8_t isActive = thermalManager.isHeatingHotend(heater);
   #endif
 
-  dwin_string.set();
-  dwin_string.add(i16tostr3rj(t2 + 0.5));
+  dwin_string.set(i16tostr3rj(t2 + 0.5));
   dwin_string.add(LCD_STR_DEGREE);
   DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y, S(dwin_string.string()));
 
   DWIN_ICON_Show(ICON, (isBed ? ICON_BedOff : ICON_HotendOff) + isActive, x, y + 30);
 
-  dwin_string.set();
-  dwin_string.add(i16tostr3rj(t1 + 0.5));
+  dwin_string.set(i16tostr3rj(t1 + 0.5));
   dwin_string.add(LCD_STR_DEGREE);
   DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 70, S(dwin_string.string()));
 }
@@ -125,8 +124,7 @@ FORCE_INLINE void _draw_feedrate_status(const char *value, uint16_t x, uint16_t 
   dwin_string.set(LCD_STR_FEEDRATE);
   DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, x, y, S(dwin_string.string()));
 
-  dwin_string.set();
-  dwin_string.add(value);
+  dwin_string.set(value);
   dwin_string.add(PSTR("%"));
   DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x + 14, y, S(dwin_string.string()));
 }
@@ -136,20 +134,23 @@ FORCE_INLINE void _draw_feedrate_status(const char *value, uint16_t x, uint16_t 
  */
 void MarlinUI::draw_status_screen() {
   const bool blink = get_blink();
+
   // Logo/Status Icon
-  DWIN_ICON_Show(ICON,ICON_LOGO, (LCD_PIXEL_WIDTH / 2) - (130 / 2), 15);
+  #define STATUS_LOGO_WIDTH 130
+  #define STATUS_LOGO_HEIGHT 15
+  DWIN_ICON_Show(ICON,ICON_LOGO, (LCD_PIXEL_WIDTH - STATUS_LOGO_WIDTH) / 2, STATUS_LOGO_HEIGHT);
 
   _draw_heater_status(H_E0, 15, 60);
 
   // Hotend 1 / Bed Temp
   #if HAS_MULTI_HOTEND
     _draw_header_status(H_E1, 85, 60);
-  #else
+  #elif HAS_HEATED_BED
     _draw_heater_status(H_BED, 85, 60);
   #endif
 
   // Fan display
-  TERN_(HAS_FAN, _draw_fan_status(175, 52));
+  TERN_(HAS_FAN, _draw_fan_status(175, 58));
 
   // Draw a frame around the x/y/z values
   DWIN_Draw_Rectangle(0, Select_Color,
@@ -166,13 +167,13 @@ void MarlinUI::draw_status_screen() {
   #if ENABLED(DWIN_MARLINUI_PORTRAIT)
     constexpr int16_t cpy = 165;
     _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 5, cpy);
-    _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, cpy);
-    _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, 165, cpy);
+    TERN_(HAS_Y_AXIS, _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, cpy));
+    TERN_(HAS_Z_AXIS, _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, 165, cpy));
   #else
     constexpr int16_t cpx = LCD_PIXEL_WIDTH - 104;
-    _draw_axis_value(X_AXIS, ftostr52sp(lpos.x), blink, cpx,  52);
-    _draw_axis_value(Y_AXIS, ftostr52sp(lpos.y), blink, cpx, 111);
-    _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, cpx, 169);
+    _draw_axis_value(X_AXIS, ftostr52sp(lpos.x), blink, cpx, 52);
+    TERN_(HAS_Y_AXIS, _draw_axis_value(Y_AXIS, ftostr52sp(lpos.y), blink, cpx, 111));
+    TERN_(HAS_Z_AXIS, _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, cpx, 169));
   #endif
 
   // Feedrate
@@ -225,7 +226,7 @@ void MarlinUI::draw_status_screen() {
     #endif
   #endif
 
-  // progress
+  // Progress bar
   const progress_t progress = TERN(HAS_PRINT_PROGRESS_PERMYRIAD, get_progress_permyriad, get_progress_percent)();
 
   constexpr int16_t leftx = LCD_PIXEL_WIDTH - TERN(DWIN_MARLINUI_PORTRAIT, 0, 107),
@@ -236,14 +237,11 @@ void MarlinUI::draw_status_screen() {
   DWIN_Draw_Rectangle(0, Select_Color, 5, botty - 60, leftx - 5, botty);
   DWIN_Draw_Rectangle(1, Select_Color, 6, botty - 60 + 1, 6 + pb_width, botty - 1);
 
-  dwin_string.set();
-  dwin_string.add(TERN(PRINT_PROGRESS_SHOW_DECIMALS, permyriadtostr4(progress), ui8tostr3rj(progress / (PROGRESS_SCALE))));
+  dwin_string.set(TERN(PRINT_PROGRESS_SHOW_DECIMALS, permyriadtostr4(progress), ui8tostr3rj(progress / (PROGRESS_SCALE))));
   dwin_string.add(PSTR("%"));
   DWIN_Draw_String(
     false,
-    font16x32,
-    Percent_Color,
-    Color_Bg_Black,
+    font16x32, Percent_Color, Color_Bg_Black,
     6 + ((leftx - 12) - (dwin_string.length() * 16)) / 2,
     12 + TERN(DWIN_MARLINUI_PORTRAIT, 300, 170),
     S(dwin_string.string())

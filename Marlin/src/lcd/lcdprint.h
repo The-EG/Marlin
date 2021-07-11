@@ -44,9 +44,9 @@
   #define LCD_HEIGHT          ((LCD_PIXEL_HEIGHT) / (MENU_LINE_HEIGHT))
 
   // The DWIN lcd_moveto function uses row / column, not pixels
-  #define LCD_COL_X(col)      (col)
-  #define LCD_ROW_Y(row)      (row)
-  #define LCD_COL_X_RJ(len)   (LCD_WIDTH - LCD_COL_X(len))
+  #define LCD_COL_X(col)    (col)
+  #define LCD_ROW_Y(row)    ((row) * MENU_LINE_HEIGHT + EXTRA_ROW_HEIGHT / 2)
+  #define LCD_COL_X_RJ(len) (LCD_WIDTH - LCD_COL_X(len))
 
 #elif HAS_MARLINUI_U8GLIB
 
