@@ -268,7 +268,7 @@ void MarlinUI::draw_status_screen() {
         time = get_remaining_time();
         time.toDigital(buffer);
         dwin_string.set(buffer);
-        DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 292, 135, S(dwin_string.string()));
+        DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 291, 135, S(dwin_string.string()));
       }
     #endif
   #endif
