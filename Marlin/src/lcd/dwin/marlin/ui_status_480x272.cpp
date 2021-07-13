@@ -42,6 +42,10 @@
   #include "../../../libs/duration_t.h"
 #endif
 
+#if ENABLED(LCD_SHOW_E_TOTAL)
+  #include "../../../MarlinCore.h" // for printingIsActive
+#endif
+
 #define S(V) (char*)(V)
 
 //
@@ -73,6 +77,23 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
   }
   DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
 }
+
+#if ENABLED(LCD_SHOW_E_TOTAL)
+
+  FORCE_INLINE void _draw_e_value(float value, uint16_t x, uint16_t y) {
+    const uint8_t scale = value >= 100000.0f ? 10 : 1; // show cm after 99,000mm
+
+    dwin_string.set("E");
+    DWIN_Draw_String(true, font16x32, Color_IconBlue, Color_Bg_Black, x + (7 * 14 / 2) - 7, y + 2, S(dwin_string.string()));
+
+    dwin_string.set(ui16tostr5rj(value / scale));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
+
+    dwin_string.set();
+    DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, x + (5 * 14), y + 32, S(scale==1 ? "mm" : "cm"));
+  }
+
+#endif
 
 FORCE_INLINE void _draw_fan_status(const uint16_t x, const uint16_t y) {
   const uint8_t fan_pct = thermalManager.scaledFanSpeedPercent(0);
@@ -168,12 +189,19 @@ void MarlinUI::draw_status_screen() {
   );
 
   // Axis values
-  // TODO: E instead of X/Y
   const xyz_pos_t lpos = current_position.asLogical();
+  const bool show_e_total = TERN0(LCD_SHOW_E_TOTAL, printingIsActive());
   #if ENABLED(DWIN_MARLINUI_PORTRAIT)
     constexpr int16_t cpy = 165;
-    _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 5, cpy);
-    TERN_(HAS_Y_AXIS, _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, cpy));
+    if(show_e_total) {
+      #if ENABLED(LCD_SHOW_E_TOTAL)
+        _draw_e_value(e_move_accumulator, 5, cpy);
+        DWIN_Draw_Box(1, Color_Bg_Black, 95, cpy, 103, 56);
+      #endif
+    } else {
+      _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 5, cpy);
+      TERN_(HAS_Y_AXIS, _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, cpy));
+    }
     TERN_(HAS_Z_AXIS, _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, 165, cpy));
   #else
     constexpr int16_t cpx = LCD_PIXEL_WIDTH - 104;
@@ -187,7 +215,7 @@ void MarlinUI::draw_status_screen() {
     #if ENABLED(DWIN_MARLINUI_PORTRAIT)
       5, 250
     #else
-      292, 60
+      291, 60
     #endif
   );
 
@@ -222,13 +250,26 @@ void MarlinUI::draw_status_screen() {
     time = print_job_timer.duration();
     time.toDigital(buffer);
     dwin_string.add(buffer);
-    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 270, 100, S(dwin_string.string()));
+    DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 277, 100, S(dwin_string.string()));
+
+    #if ENABLED(LCD_SHOW_E_TOTAL)
+      if(show_e_total && TERN1(SHOW_REMAINING_TIME, !blink)) { // if SHOW_REMAINING_TIME is also
+        const uint8_t escale = e_move_accumulator >= 100000.0f ? 10 : 1; // show cm after 99,000mm
+
+        DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, 249, 135, S("E"));
+        dwin_string.set(ui16tostr5rj(e_move_accumulator * escale));
+        DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 263, 135, S(dwin_string.string()));
+        DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, 333, 135, S(escale==1 ? "mm" : "cm"));
+      }
+    #endif
     #if ENABLED(SHOW_REMAINING_TIME)
-      time = get_remaining_time();
-      dwin_string.set("R");
-      time.toDigital(buffer);
-      dwin_string.add(buffer);
-      DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 270, 135, S(dwin_string.string()));
+      if(!show_e_total || blink) {
+        DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, 249, 135, S(" R "));
+        time = get_remaining_time();
+        time.toDigital(buffer);
+        dwin_string.set(buffer);
+        DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, 292, 135, S(dwin_string.string()));
+      }
     #endif
   #endif
 
