@@ -53,8 +53,9 @@
 
 // Picture ID
 #if IS_DWIN_MARLINUI
-  #define DWIN_Boot_Horiz     0
-  #define DWIN_Boot_Vert      1
+  #define DWIN_Boot_Horiz      0
+  #define DWIN_Boot_Vert       1
+  #define DWIN_MarlinUI_Assets 2
 #else
   #define DWIN_Boot_Screen    0
   #define Language_English    1
@@ -249,8 +250,6 @@ void DWIN_Frame_SetDir(uint8_t dir);
 void DWIN_UpdateLCD(void);
 
 /*---------------------------------------- Drawing functions ----------------------------------------*/
-
-void DWIN_Draw_Bitmap(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint16_t colorOff, const uint16_t colorOn, const unsigned char *data);
 
 // Clear screen
 //  color: Clear screen color

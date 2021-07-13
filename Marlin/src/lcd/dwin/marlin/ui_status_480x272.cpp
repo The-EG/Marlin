@@ -136,9 +136,15 @@ void MarlinUI::draw_status_screen() {
   const bool blink = get_blink();
 
   // Logo/Status Icon
-  #define STATUS_LOGO_WIDTH 130
-  #define STATUS_LOGO_HEIGHT 15
-  DWIN_ICON_Show(ICON,ICON_LOGO, (LCD_PIXEL_WIDTH - STATUS_LOGO_WIDTH) / 2, STATUS_LOGO_HEIGHT);
+  #define STATUS_LOGO_WIDTH 272
+  #define STATUS_LOGO_HEIGHT 32
+  DWIN_Frame_AreaCopy(1,
+  TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH, 0),                                      // start x
+  0,                                                                                       // start y
+  TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH + STATUS_LOGO_HEIGHT, STATUS_LOGO_WIDTH), // end x
+  TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH, STATUS_LOGO_HEIGHT),                     // end y
+  TERN(DWIN_MARLINUI_PORTRAIT, 0, (LCD_PIXEL_WIDTH - STATUS_LOGO_WIDTH) / 2),              // screen x
+  0);                                                                                      // screen y
 
   _draw_heater_status(H_E0, 15, 60);
 
