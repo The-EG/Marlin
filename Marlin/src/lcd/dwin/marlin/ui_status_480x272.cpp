@@ -75,22 +75,29 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
           dwin_string.add(value);
     }
   }
+  #if BOTH(DWIN_MARLINUI_PORTRAIT, LCD_SHOW_E_TOTAL)
+    if (axis==X_AXIS) {
+      // if we just switched back from displaying E_TOTAL then there are a few more characters to cover up
+      dwin_string.add("   ");
+    }
+  #endif
   DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
 }
 
 #if ENABLED(LCD_SHOW_E_TOTAL)
 
   FORCE_INLINE void _draw_e_value(float value, uint16_t x, uint16_t y) {
-    const uint8_t scale = value >= 100000.0f ? 10 : 1; // show cm after 99,000mm
+    const uint8_t scale = value >= 100000.0f ? 10 : 1; // show cm after 99,999mm
 
-    dwin_string.set("E");
-    DWIN_Draw_String(true, font16x32, Color_IconBlue, Color_Bg_Black, x + (7 * 14 / 2) - 7, y + 2, S(dwin_string.string()));
+    // extra spaces so we don't have to clear the 'Y' label separately
+    dwin_string.set("E         ");
+    DWIN_Draw_String(true, font16x32, Color_IconBlue, Color_Bg_Black, x + (4 * 14 / 2) - 7, y + 2, S(dwin_string.string()));
 
     dwin_string.set(ui16tostr5rj(value / scale));
     DWIN_Draw_String(true, font14x28, Color_White, Color_Bg_Black, x, y + 32, S(dwin_string.string()));
 
-    dwin_string.set();
-    DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, x + (5 * 14), y + 32, S(scale==1 ? "mm" : "cm"));
+    // extra spaces so we don't have to clear out of the Y value separately
+    DWIN_Draw_String(true, font14x28, Color_IconBlue, Color_Bg_Black, x + (5 * 14), y + 32, S(scale==1 ? "mm      " : "cm      "));
   }
 
 #endif
@@ -160,12 +167,13 @@ void MarlinUI::draw_status_screen() {
   #define STATUS_LOGO_WIDTH 272
   #define STATUS_LOGO_HEIGHT 32
   DWIN_Frame_AreaCopy(1,
-  TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH, 0),                                      // start x
-  0,                                                                                       // start y
-  TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH + STATUS_LOGO_HEIGHT, STATUS_LOGO_WIDTH), // end x
-  TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH, STATUS_LOGO_HEIGHT),                     // end y
-  TERN(DWIN_MARLINUI_PORTRAIT, 0, (LCD_PIXEL_WIDTH - STATUS_LOGO_WIDTH) / 2),              // screen x
-  0);                                                                                      // screen y
+    0,                                                                          // start x
+    TERN(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH, 0),                         // start y
+    STATUS_LOGO_WIDTH,                                                          // end x
+    TERN0(DWIN_MARLINUI_PORTRAIT, STATUS_LOGO_WIDTH) + STATUS_LOGO_HEIGHT,      // end y
+    TERN(DWIN_MARLINUI_PORTRAIT, 0, (LCD_PIXEL_WIDTH - STATUS_LOGO_WIDTH) / 2), // screen x
+    0                                                                           // screen y
+  );
 
   _draw_heater_status(H_E0, 15, 60);
 
@@ -195,11 +203,10 @@ void MarlinUI::draw_status_screen() {
     constexpr int16_t cpy = 165;
     if(show_e_total) {
       #if ENABLED(LCD_SHOW_E_TOTAL)
-        _draw_e_value(e_move_accumulator, 5, cpy);
-        DWIN_Draw_Box(1, Color_Bg_Black, 95, cpy, 103, 56);
+        _draw_e_value(e_move_accumulator, 6, cpy);
       #endif
     } else {
-      _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 5, cpy);
+      _draw_axis_value(X_AXIS, ftostr4sign(lpos.x), blink, 6, cpy);
       TERN_(HAS_Y_AXIS, _draw_axis_value(Y_AXIS, ftostr4sign(lpos.y), blink, 95, cpy));
     }
     TERN_(HAS_Z_AXIS, _draw_axis_value(Z_AXIS, ftostr52sp(lpos.z), blink, 165, cpy));
@@ -245,7 +252,6 @@ void MarlinUI::draw_status_screen() {
   #else
 
     // landscape mode shows both elapsed and remaining (if SHOW_REMAINING_TIME)
-    // TODO: show E here if it's enabled and rotate with remaining???
     dwin_string.set(" ");
     time = print_job_timer.duration();
     time.toDigital(buffer);
@@ -279,7 +285,7 @@ void MarlinUI::draw_status_screen() {
   constexpr int16_t leftx = LCD_PIXEL_WIDTH - TERN(DWIN_MARLINUI_PORTRAIT, 0, 107),
                     botty = TERN(DWIN_MARLINUI_PORTRAIT, 360, 230);
 
-  uint16_t pb_width = (LCD_PIXEL_WIDTH - 12 - 107) * (progress / PROGRESS_SCALE * 0.01f);
+  uint16_t pb_width = (LCD_PIXEL_WIDTH - 12 - TERN(DWIN_MARLINUI_PORTRAIT, 0, 107)) * (progress / PROGRESS_SCALE * 0.01f);
   DWIN_Draw_Rectangle(1, Color_Bg_Black, 5, botty - 60, leftx - 5, botty); // 'clear' it first
   DWIN_Draw_Rectangle(0, Select_Color, 5, botty - 60, leftx - 5, botty);
   DWIN_Draw_Rectangle(1, Select_Color, 6, botty - 60 + 1, 6 + pb_width, botty - 1);
