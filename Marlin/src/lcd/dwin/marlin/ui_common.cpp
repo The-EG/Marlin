@@ -363,7 +363,7 @@ void MarlinUI::draw_status_message(const bool blink) {
       dwin_string.set();
       dwin_string.add(value);
 
-      const dwin_coord_t by = LCD_ROW_Y(row) + MENU_FONT_HEIGHT + 4;
+      const dwin_coord_t by = (row * MENU_LINE_HEIGHT) + MENU_FONT_HEIGHT + EXTRA_ROW_HEIGHT / 2;
       DWIN_Draw_String(true, font16x32, Color_Yellow, Color_Bg_Black, (LCD_PIXEL_WIDTH - vallen * 16) / 2, by, (char*)dwin_string.string());
 
       extern screenFunc_t _manual_move_func_ptr;

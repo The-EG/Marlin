@@ -47,7 +47,7 @@ void lcd_moveto_xy(const lcd_uint_t x, const lcd_uint_t y) { cursor.x = x; curso
 
 void lcd_moveto(const lcd_uint_t col, const lcd_uint_t row) {
   cursor.x = col * dwin_font.width;
-  cursor.y = LCD_ROW_Y(row);
+  cursor.y = (row * (dwin_font.height + EXTRA_ROW_HEIGHT)) + (EXTRA_ROW_HEIGHT / 2);
 }
 
 inline void lcd_advance_cursor() { cursor.x += dwin_font.width; }
