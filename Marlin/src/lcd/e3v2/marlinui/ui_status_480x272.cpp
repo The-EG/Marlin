@@ -271,12 +271,12 @@ void MarlinUI::draw_status_screen() {
   if (!ui.did_first_redraw) {
     // Logo/Status Icon
     #define STATUS_LOGO_WIDTH  128
-    #define STATUS_LOGO_HEIGHT  40
+    #define STATUS_LOGO_HEIGHT  80
     dwinIconShow(ICON, ICON_LOGO_Marlin,
       #if ENABLED(DWIN_MARLINUI_PORTRAIT)
         (LCD_PIXEL_WIDTH - (STATUS_LOGO_WIDTH)) / 2, ((STATUS_HEATERS_Y - 4) - (STATUS_LOGO_HEIGHT)) / 2
       #else
-        5, 42
+        5, 22
       #endif
     );
 
