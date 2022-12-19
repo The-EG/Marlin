@@ -2031,7 +2031,7 @@
 #if _HAS_STATE(Z,,MAX)
   #define HAS_Z_MAX_STATE 1
 #endif
-#if HAS_Z_MIN_STATE || HAS_Z_MAX_STATE
+#if HAS_Z_MIN_STATE || HAS_Z_MAX_STATE 
   #define HAS_Z_STATE 1
 #endif
 
