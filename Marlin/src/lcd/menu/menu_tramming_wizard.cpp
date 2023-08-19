@@ -52,6 +52,13 @@ static int8_t reference_index; // = 0
   #include "../../feature/bedlevel/bedlevel.h"
 #endif
 
+static void _draw_probing() {
+  if (ui.should_draw()) {
+    constexpr uint8_t line = (LCD_HEIGHT - 1) / 2;
+    MenuItem_static::draw(line, GET_TEXT_F(MSG_PROBING_POINT));
+  }
+}
+
 static bool probe_single_point() {
   const float z_probed_height = probe.probe_at_point(tramming_points[tram_index], PROBE_PT_RAISE);
   z_measured[tram_index] = z_probed_height;
@@ -68,20 +75,47 @@ static bool probe_single_point() {
 static void _menu_single_probe() {
   DEBUG_ECHOLNPGM("Screen: single probe screen Arg:", tram_index);
   START_MENU();
-  STATIC_ITEM(MSG_BED_TRAMMING, SS_LEFT);
+  STATIC_ITEM(MSG_BED_TRAMMING, SS_CENTER | SS_INVERT);
   STATIC_ITEM(MSG_LAST_VALUE_SP, SS_LEFT, z_isvalid[tram_index] ? ftostr42_52(z_measured[reference_index] - z_measured[tram_index]) : "---");
-  ACTION_ITEM(MSG_UBL_BC_INSERT2, []{ if (probe_single_point()) ui.refresh(); });
+
+  ACTION_ITEM(MSG_UBL_BC_INSERT2, []{ 
+    ui.goto_screen(_draw_probing);  
+    if (probe_single_point()) ui.goto_screen(_menu_single_probe);
+  });
+  ACTION_ITEM(MSG_BUTTON_DONE, ui.goto_previous_screen);
+  END_MENU();
+}
+
+static void _menu_select_origin() {
+  START_MENU();
+  STATIC_ITEM(MSG_BED_TRAMMING, SS_CENTER | SS_INVERT);
+  STATIC_ITEM(MSG_SELECT_ORIGIN);
+
+  // Draw a menu item for each tramming point
+  for (tram_index = 0; tram_index < G35_PROBE_COUNT; tram_index++)
+    ACTION_ITEM_F(FPSTR(pgm_read_ptr(&tramming_point_name[tram_index])), [] { 
+      ui.goto_screen(_draw_probing);
+      reference_index = -1; 
+      probe_single_point(); 
+      ui.goto_previous_screen(); 
+    });
+
   ACTION_ITEM(MSG_BUTTON_DONE, ui.goto_previous_screen);
   END_MENU();
 }
 
 static void tramming_wizard_menu() {
   START_MENU();
-  STATIC_ITEM(MSG_SELECT_ORIGIN);
+  STATIC_ITEM(MSG_BED_TRAMMING, SS_CENTER | SS_INVERT);
+  
+  SUBMENU(MSG_SELECT_ORIGIN, _menu_select_origin);
 
-  // Draw a menu item for each tramming point
-  for (tram_index = 0; tram_index < G35_PROBE_COUNT; tram_index++)
-    SUBMENU_F(FPSTR(pgm_read_ptr(&tramming_point_name[tram_index])), _menu_single_probe);
+  if (reference_index >= 0) {
+    // Draw a menu item for each tramming point
+    for (tram_index = 0; tram_index < G35_PROBE_COUNT; tram_index++) {
+      if (tram_index != reference_index) SUBMENU_F(FPSTR(pgm_read_ptr(&tramming_point_name[tram_index])), _menu_single_probe);
+    }  
+  }
 
   ACTION_ITEM(MSG_BUTTON_DONE, []{
     probe.stow(); // Stow before exiting Tramming Wizard
@@ -102,6 +136,7 @@ void goto_tramming_wizard() {
   // Inject G28, wait for homing to complete,
   set_all_unhomed();
   queue.inject(TERN(CAN_SET_LEVELING_AFTER_G28, F("G28L0"), FPSTR(G28_STR)));
+  
 
   ui.goto_screen([]{
     _lcd_draw_homing();
