@@ -2025,7 +2025,7 @@
 #if _USE_STOP(Z,,MAX,)
   #define USE_Z_MAX 1
 #endif
-#if _HAS_STATE(Z,,MIN)
+#if _HAS_STATE(Z,,MIN) || ENABLED(USE_PROBE_FOR_Z_HOMING)
   #define HAS_Z_MIN_STATE 1
 #endif
 #if _HAS_STATE(Z,,MAX)
